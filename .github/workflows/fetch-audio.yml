@@ -1,0 +1,27 @@
+name: Fetch audio
+on:
+  push:
+    paths: ['jobs/*.url']
+permissions:
+  contents: write
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download pending audio files
+        run: |
+          set -e
+          for f in jobs/*.url; do
+            name=$(basename "$f" .url)
+            if [ ! -f "audio/$name.mp3" ]; then
+              curl -sSL --fail -o "audio/$name.mp3" "$(head -n1 "$f")"
+              echo "downloaded $name"
+            fi
+          done
+      - name: Commit
+        run: |
+          git config user.name "eyla-bot"
+          git config user.email "eyla-bot@users.noreply.github.com"
+          git add audio/*.mp3 || true
+          git diff --cached --quiet || (git commit -m "audio: fetched" && git push)
