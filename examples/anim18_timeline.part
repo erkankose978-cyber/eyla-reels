@@ -1,0 +1,163 @@
+// ---------- Perde kaç metre (cue-driven, 14 phrases) ----------
+const CU=window.CUES, S=i=>CU[i].s, E=i=>CU[i].e, at=(i,f)=>S(i)+(E(i)-S(i))*f;
+const OUT=window.OUTRO, END=window.END;
+const TXT=['Perdeniz cılız ve sarkık mı duruyor?','Sorun kumaşta değil, hesapta.','Önce korniş:','pencerenin iki yanından yirmişer santim taşsın.','Perde açıkken camı kapatmaz, pencere de daha geniş görünür.','Sonra kumaş:','fon perde için korniş boyunun iki katı,','tül için iki buçuk katı.','Yani yüz altmışlık bir pencere, iki metre korniş:','fon için dört metre, tül için beş metre kumaş.','Korniş tavana yakın olsun,','perde yere bir santim kala bitsin.','Sizin pencereniz kaç santim?','Yorumlara yazın.'];
+const GROUPS=[[0],[1],[2,3],[4],[5,6],[7],[8],[9],[10],[11]];
+const WT=TXT.map((s,i)=>{ const ws=s.split(' '); const tot=ws.reduce((a,w)=>a+w.length+1,0); let acc=0; return ws.map(w=>{ const t0=S(i)+(E(i)-S(i))*acc/tot; acc+=w.length+1; return [w,t0]; }); });
+function captions(t){
+  GROUPS.forEach((gr,gi)=>{
+    const t0=S(gr[0])-.08, t1= gi<GROUPS.length-1 ? S(GROUPS[gi+1][0])-.08 : S(12)-.1;
+    const a=win(t,t0,t1,.15,.12); if(a<=0) return;
+    const words=[].concat(...gr.map(i=>WT[i])); const nextT=k=> k+1<words.length? words[k+1][1] : E(gr[gr.length-1])+.2;
+    g.save(); g.globalAlpha=a; g.font='600 48px P'; g.textBaseline='middle';
+    const sp=15, ws=words.map(w=>g.measureText(w[0]).width); const lines=[[]]; let lw=0;
+    words.forEach((w,i)=>{ if(lw+ws[i]>900 && lines[lines.length-1].length){ lines.push([]); lw=0; } lines[lines.length-1].push(i); lw+=ws[i]+sp; });
+    const y0=1720-(lines.length-1)*38;
+    lines.forEach((ln,li)=>{ const tot=ln.reduce((s,i)=>s+ws[i],0)+sp*(ln.length-1); let x=W/2-tot/2; const y=y0+li*76;
+      ln.forEach(i=>{ const on=t>=words[i][1], cur=on && t<nextT(i);
+        if(cur){ g.fillStyle=D.gold; rr(x-10,y-34,ws[i]+20,68,15); g.fill(); }
+        g.fillStyle= cur? D.ink : (on? D.cream : 'rgba(244,237,228,.35)'); g.textAlign='left'; g.fillText(words[i][0],x,y); x+=ws[i]+sp; }); });
+    g.restore(); });
+}
+function dim(x1,y1,x2,y2,label,col,a,offx=0,offy=0){
+  if(a<=0) return; g.save(); g.globalAlpha*=a; g.strokeStyle=col; g.lineWidth=3.5; g.lineCap='round';
+  const p=eOut(clamp(a*1.2)); const mx=(x1+x2)/2, my=(y1+y2)/2; const hx=(x2-x1)/2*p, hy=(y2-y1)/2*p;
+  g.beginPath(); g.moveTo(mx-hx,my-hy); g.lineTo(mx+hx,my+hy); g.stroke();
+  const vx=y2-y1, vy=-(x2-x1), L=Math.hypot(vx,vy)||1, ux=vx/L*13, uy=vy/L*13;
+  for(const [x,y] of [[mx-hx,my-hy],[mx+hx,my+hy]]){ g.beginPath(); g.moveTo(x-ux,y-uy); g.lineTo(x+ux,y+uy); g.stroke(); }
+  g.restore(); if(label) chip(mx+offx,my+offy,label,col,a,1,25);
+}
+// ===== wall elevation =====
+const K=3, X0=90, YF=1370; // 3 px/cm; wall 300 x 270
+const wx=c=>X0+c*K, wy=c=>YF-c*K; // c = height from floor
+const WIN={x1:70,x2:230,b:90,t:240};
+function wall(t){
+  g.save(); g.shadowColor='rgba(0,0,0,.5)'; g.shadowBlur=50; g.shadowOffsetY=18;
+  const gr=g.createLinearGradient(0,wy(270),0,wy(0)); gr.addColorStop(0,'#EFE8DE'); gr.addColorStop(1,'#E4DACD'); g.fillStyle=gr; g.fillRect(wx(0),wy(270),300*K,270*K); g.restore();
+  // ceiling line + cornice
+  g.fillStyle='#F8F4EE'; g.fillRect(wx(0),wy(270),300*K,10); g.fillStyle='rgba(0,0,0,.08)'; g.fillRect(wx(0),wy(270)+10,300*K,4);
+  // floor
+  g.fillStyle='#B89A7C'; g.fillRect(wx(0)-20,wy(0),300*K+40,26); g.fillStyle='#F4EFE8'; g.fillRect(wx(0),wy(0)-18,300*K,18);
+  // window
+  const X=wx(WIN.x1), Y=wy(WIN.t), Wd=(WIN.x2-WIN.x1)*K, Hd=(WIN.t-WIN.b)*K;
+  g.fillStyle='#FFFFFF'; g.fillRect(X-14,Y-14,Wd+28,Hd+28);
+  const sky=g.createLinearGradient(0,Y,0,Y+Hd); sky.addColorStop(0,'#BFD6E2'); sky.addColorStop(1,'#E9EFE8'); g.fillStyle=sky; g.fillRect(X,Y,Wd,Hd);
+  g.fillStyle='rgba(255,255,255,.35)'; g.beginPath(); g.moveTo(X+30,Y+Hd); g.lineTo(X+Wd*.45,Y); g.lineTo(X+Wd*.62,Y); g.lineTo(X+80+30,Y+Hd); g.closePath(); g.fill();
+  g.strokeStyle='#FFFFFF'; g.lineWidth=10; g.beginPath(); g.moveTo(X+Wd/2,Y); g.lineTo(X+Wd/2,Y+Hd); g.stroke();
+  g.fillStyle='#FFFFFF'; g.fillRect(X-24,wy(WIN.b),Wd+48,12);
+}
+function curtain(x1,x2,top,bot,full,col,sheer,a=1){
+  if(a<=0||x2-x1<1) return; g.save(); g.globalAlpha*=a;
+  const X=wx(x1), Wd=(x2-x1)*K, Y=wy(top)+14, Hb=wy(bot);
+  const n=Math.max(2,Math.round((x2-x1)/9));
+  for(let k=0;k<n;k++){ const xa=X+Wd*k/n, xb=X+Wd*(k+1)/n;
+    const gr=g.createLinearGradient(xa,0,xb,0); const amp=.18*full;
+    gr.addColorStop(0,shade(col,1-amp)); gr.addColorStop(.5,shade(col,1+amp*.6)); gr.addColorStop(1,shade(col,1-amp));
+    g.fillStyle=sheer? gr : gr; g.globalAlpha=(sheer?.55:1)*a; g.fillRect(xa,Y,xb-xa+.6,Hb-Y); }
+  // sag line at bottom when not full
+  g.globalAlpha=a; g.strokeStyle=sheer?'rgba(255,255,255,.6)':shade(col,.8); g.lineWidth=2; g.beginPath(); g.moveTo(X,Hb); g.lineTo(X+Wd,Hb); g.stroke();
+  // rings
+  if(!sheer){ g.fillStyle='#8E7B66'; for(let k=0;k<=n;k++){ g.beginPath(); g.arc(X+Wd*k/n,Y-4,4,0,7); g.fill(); } }
+  g.restore(); }
+function rod(x1,x2,h,a=1){ if(a<=0) return; g.save(); g.globalAlpha*=a; const y=wy(h);
+  g.fillStyle='#5E4E40'; rr(wx(x1),y-5,(x2-x1)*K,10,5); g.fill();
+  g.beginPath(); g.arc(wx(x1)-6,y,9,0,7); g.arc(wx(x2)+6,y,9,0,7); g.fill(); g.restore(); }
+
+function scene(t){
+  const A=win(t,0,S(12)+.1,.5,.35); if(A<=0) return; g.save(); g.globalAlpha=A;
+  const z=1+.035*prog(t,0,S(12)); g.translate(540,980); g.scale(z,z); g.translate(-540,-980);
+  wall(t);
+  // rod geometry
+  const ext=eBack(prog(t,at(3,.35),at(3,.75)));
+  const rx1=lerp(70,50,ext), rx2=lerp(230,250,ext);
+  const up=eIO(prog(t,S(10)+.1,S(10)+.8)); const rh=lerp(250,265,up);
+  // curtains
+  const full=eIO(prog(t,S(6),S(6)+.8));
+  const open=eIO(prog(t,S(4),S(4)+.8));
+  const drop=eIO(prog(t,S(11),S(11)+.8));
+  const bot=lerp(lerp(45,1,0),1,0); // placeholder
+  const fonBot = t<S(11)? lerp(45,45,0) : lerp(45,1,drop);
+  // wrong state (before open): flat panels covering window edges
+  const pw=lerp(48,lerp(40,50,full),open); // panel width (cm)
+  const lx1=rx1, lx2=lerp(rx1+pw, rx1+pw, 1);
+  // tül
+  const tul=eOut(prog(t,S(7),S(7)+.6));
+  curtain(rx1+4,rx2-4,rh,fonBot+2,1,'#FFFFFF',true,tul);
+  const colF= '#B9A38A';
+  curtain(rx1, rx1+pw, rh, fonBot, lerp(.15,1,full), colF, false, 1);
+  curtain(rx2-pw, rx2, rh, fonBot, lerp(.15,1,full), colF, false, 1);
+  rod(rx1,rx2,rh,1);
+  // wrong-state markers
+  if(t<S(2)){ const pu=.5+.5*Math.sin(t*7); const wA=win(t,.6,S(2)+.05,.3,.25);
+    if(wA>0){ g.save(); g.globalAlpha*=wA*(.5+.5*pu); g.strokeStyle=D.bad; g.lineWidth=5; g.setLineDash([12,8]); g.strokeRect(wx(70)-8,wy(250)-8,160*K+16,(250-45)*K+16); g.setLineDash([]); g.restore(); } }
+  g.restore();
+  // chips
+  chip(wx(150),wy(30),'Perde kısa',D.bad,win(t,.8,S(2),.3,.25),eBack(prog(t,.8,1.2)),26,'✕');
+  chip(wx(150),wy(165),'Camı kapatıyor',D.bad,win(t,S(1),S(2),.3,.25),eBack(prog(t,S(1),S(1)+.4)),26,'✕');
+  const dA=win(t,at(3,.6),S(5)+.2,.35,.3);
+  if(dA>0){ dim(wx(50),wy(rh)-40,wx(70),wy(rh)-40,null,D.gold,dA); dim(wx(230),wy(rh)-40,wx(250),wy(rh)-40,null,D.gold,dA);
+    chip(wx(60),wy(rh)-90,'+20',D.gold,dA,1,26); chip(wx(240),wy(rh)-90,'+20',D.gold,dA,1,26); }
+  chip(wx(150),wy(165),'Cam açık, pencere geniş',D.good,win(t,at(4,.5),S(5)+.1,.3,.3),eBack(prog(t,at(4,.5),at(4,.5)+.4)),26,'✓');
+  chip(wx(150),wy(rh)-80,'Korniş 200 cm',D.gold,win(t,S(8),S(10),.3,.3),eBack(prog(t,S(8),S(8)+.4)),28);
+  // ceiling gap + floor gap
+  const cA=win(t,S(10)+.5,S(12),.3,.3); if(cA>0) chip(wx(260)+10,wy(268)+24,'Tavana yakın',D.good,cA,eBack(prog(t,S(10)+.5,S(10)+.9)),24,'✓');
+  const fA=win(t,at(11,.5),S(12),.3,.3); if(fA>0){ chip(wx(28),wy(0)-60,'1 cm',D.good,fA,eBack(prog(t,at(11,.5),at(11,.5)+.4)),26,'✓'); }
+}
+// fabric multiplier card
+function fabric(t){
+  const a=win(t,S(5)-.1,S(10)+.1,.35,.3); if(a<=0) return; g.save(); g.globalAlpha=a;
+  const y0=1440; glass(80,y0,920,170,30);
+  const rows=[['Fon','× 2',S(6),'400 cm',S(9)],['Tül','× 2,5',S(7),'500 cm',at(9,.55)]];
+  rows.forEach(([lab,mul,ts,res,tr],i)=>{ const y=y0+52+i*68; const p=eOut(prog(t,ts,ts+.4)); if(p<=0) return;
+    g.save(); g.globalAlpha*=p; g.font='600 34px P'; g.fillStyle=D.cream; g.textAlign='left'; g.textBaseline='middle'; g.fillText(lab,120,y);
+    g.font='italic 600 40px L'; g.fillStyle=D.gold2; g.fillText('korniş '+mul,240,y);
+    // ribbon
+    const L= i===0? 400:500; const rp=eIO(prog(t,tr,tr+.8)); const rw=lerp(150,L*0.62,rp);
+    g.fillStyle= i===0? '#B9A38A':'rgba(255,255,255,.75)'; rr(520,y-18,rw,36,8); g.fill();
+    if(t>=tr){ g.font='700 34px P'; g.fillStyle=D.good; g.textAlign='right'; g.fillText(res,960,y); }
+    g.restore(); });
+  g.restore(); }
+function cta(t){
+  const a=win(t,S(12)-.1,OUT+.1,.35,.3); if(a<=0) return; g.save(); g.globalAlpha=a;
+  const bp=eBack(prog(t,S(12),S(12)+.5)); g.save(); g.translate(540,640); g.scale(bp,bp); g.rotate(Math.sin(t*3)*.04);
+  glass(-110,-85,220,150,40,'rgba(217,181,127,.7)'); g.fillStyle='rgba(30,25,20,.86)'; g.beginPath(); g.moveTo(-30,63); g.lineTo(-62,112); g.lineTo(10,63); g.fill();
+  g.fillStyle=D.gold; for(let k=-1;k<=1;k++){ g.beginPath(); g.arc(k*50,-10,13+3*Math.max(0,Math.sin(t*6-k)),0,7); g.fill(); } g.restore();
+  headline(t,S(12),[[['Sizin','n'],['pencereniz','n']],[['kaç','i'],['santim?','i']]],920,80,.07);
+  g.save(); g.globalAlpha*=eOut(prog(t,S(12)+.6,S(12)+1)); g.font='italic 600 46px L'; g.fillStyle=D.gold2; g.textAlign='center'; g.fillText('( ___ cm + 40 ) × 2 = ?',540,1110); g.restore();
+  const yA=eOut(prog(t,S(13),S(13)+.4)); if(yA>0){ g.save(); g.globalAlpha*=yA; g.font='700 50px P'; g.fillStyle=D.good; g.textAlign='center'; g.fillText('Yorumlara yazın',540,1280);
+    g.strokeStyle=D.good; g.lineWidth=7; g.lineCap='round'; const yy=1320+Math.sin(t*6)*8; g.beginPath(); g.moveTo(540,yy); g.lineTo(540,yy+60); g.moveTo(515,yy+35); g.lineTo(540,yy+62); g.lineTo(565,yy+35); g.stroke(); g.restore(); }
+  g.restore(); }
+function outro(t){
+  const p=prog(t,OUT,OUT+.7); if(p<=0) return;
+  const R=eIO(p)*Math.hypot(W,H);
+  g.save(); g.beginPath(); g.arc(W/2,960,R,0,7); g.clip();
+  const gr=g.createRadialGradient(W/2,900,50,W/2,960,1300); gr.addColorStop(0,'#3A302A'); gr.addColorStop(1,'#120F0C'); g.fillStyle=gr; g.fillRect(0,0,W,H);
+  const lp_=eOut(prog(t,OUT+.45,OUT+1.3)); const L=imgs.logoW, h=lerp(380,420,lp_), w=L.width/L.height*h;
+  g.globalAlpha=lp_; g.drawImage(L,W/2-w/2,800-h/2+(1-lp_)*40,w,h);
+  const ln=eIO(prog(t,OUT+1.0,OUT+1.7)); g.globalAlpha=1; g.strokeStyle=D.gold; g.lineWidth=3; g.beginPath(); g.moveTo(W/2-140*ln,1060); g.lineTo(W/2+140*ln,1060); g.stroke();
+  const t1=eOut(prog(t,OUT+1.2,OUT+1.8)); g.globalAlpha=t1; g.font='300 46px P'; g.fillStyle=D.cream; g.textAlign='center'; g.textBaseline='middle';
+  g.letterSpacing='14px'; g.fillText('İÇ MİMARLIK',W/2+7,1130+(1-t1)*20); g.letterSpacing='0px';
+  const t2=eOut(prog(t,OUT+1.6,OUT+2.2)); g.globalAlpha=t2; g.font='700 40px P'; g.fillStyle=D.gold; g.fillText('#SantimiSantimine',W/2,1250+(1-t2)*20);
+  g.font='italic 500 36px L'; g.fillStyle='rgba(244,237,228,.8)'; g.fillText('Her gün bir iç mimarlık kuralı',W/2,1320+(1-t2)*20);
+  const t3=eOut(prog(t,OUT+2.0,OUT+2.6)); g.globalAlpha=t3*.5; g.font='400 23px P'; g.fillStyle=D.cream;
+  g.fillText('Oranlar genel öneridir; kumaşın cinsine ve pile tipine göre değişebilir.',W/2,1640);
+  g.globalAlpha=eIn(prog(t,END-.35,END)); g.fillStyle='#000'; g.fillRect(0,0,W,H);
+  g.restore(); }
+const HEADS=[
+  [S(0)-.05,S(2),[[['Perde','n'],['kaç','i'],['metre','i']],[['alınır?','n']]]],
+  [S(2),S(5),[[['Korniş','n']],[['pencere','n'],['+','n'],['40','i'],['cm','i']]]],
+  [S(5),S(8),[[['Kumaş','n']],[['fon','n'],['×2,','i'],['tül','n'],['×2,5','i']]]],
+  [S(8),S(10),[[['160','n'],['cm','n'],['pencere','n']],[['4','i'],['m','i'],['fon,','n'],['5','i'],['m','i'],['tül','n']]]],
+  [S(10),S(12),[[['Tavana','n'],['yakın,','n']],[['yere','n'],['1','i'],['cm','i']]]],
+];
+window.draw=function(t){
+  g.setTransform(1,0,0,1,0,0); g.globalAlpha=1; g.filter='none';
+  bg(t); topBar();
+  HEADS.forEach(([a,b,lines])=>{ const h=win(t,a,b,.01,.3); if(h>0){ g.save(); g.globalAlpha=h; headline(t,a,lines,300,74); g.restore(); } });
+  scene(t); fabric(t); cta(t);
+  captions(t);
+  for(const tt of [S(2),S(5),S(8),S(10),S(12)]){ const p=prog(t,tt-.25,tt+.35); if(p>0&&p<1){ const x=lerp(-400,W+400,eIO(p)); const sw=g.createLinearGradient(x-260,0,x+260,0); sw.addColorStop(0,'rgba(255,230,190,0)'); sw.addColorStop(.5,'rgba(255,230,190,.16)'); sw.addColorStop(1,'rgba(255,230,190,0)'); g.fillStyle=sw; g.fillRect(0,0,W,H); } }
+  outro(t);
+  post(t);
+};
+</script></body></html>

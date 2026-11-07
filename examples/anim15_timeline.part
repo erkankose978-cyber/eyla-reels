@@ -1,0 +1,143 @@
+// ---------- timeline (cue-driven) ----------
+const CU=window.CUES, S=i=>CU[i].s, E=i=>CU[i].e, at=(i,f)=>S(i)+(E(i)-S(i))*f;
+const OUT=window.OUTRO, END=window.END;
+const TXT=['İç mimar pahalı mı?','Yanlış alınmış bir koltuk ondan da pahalı.','Koltuğu alıyorsun, salona sığmıyor.','Halı küçük kalıyor,','avize ya kafana değiyor ya da kayboluyor.','Fayans döşendikten sonra prizin yanlış yerde olduğunu fark ediyorsun.','Tüm bunlar','tek tek küçük hatalar.','Ama','hepsi toplanınca','bir tadilat daha demek.','İç mimar işe ölçüyle başlar:','önce plan,','sonra sıra,','en son alışveriş.','Senin evinde sonradan fark ettiğin hata ne oldu?','Yorumlara yaz.'];
+const GROUPS=[[0],[1],[2],[3,4],[5],[6,7],[8,9,10],[11],[12,13,14]];
+// word timings: spread each segment's words by character length
+const WT=TXT.map((s,i)=>{ const ws=s.split(' '); const tot=ws.reduce((a,w)=>a+w.length+1,0); let acc=0; return ws.map(w=>{ const t0=S(i)+(E(i)-S(i))*acc/tot; acc+=w.length+1; return [w,t0]; }); });
+function captions(t){
+  GROUPS.forEach((gr,gi)=>{
+    const t0=S(gr[0])-.08, t1= gi<GROUPS.length-1 ? S(GROUPS[gi+1][0])-.08 : S(15)-.1;
+    const a=win(t,t0,t1,.15,.12); if(a<=0) return;
+    const words=[].concat(...gr.map(i=>WT[i])); const nextT=(k)=> k+1<words.length? words[k+1][1] : E(gr[gr.length-1])+.2;
+    g.save(); g.globalAlpha=a; g.font='600 50px P'; g.textBaseline='middle';
+    const sp=16, ws=words.map(w=>g.measureText(w[0]).width); const lines=[[]]; let lw=0;
+    words.forEach((w,i)=>{ if(lw+ws[i]>900 && lines[lines.length-1].length){ lines.push([]); lw=0; } lines[lines.length-1].push(i); lw+=ws[i]+sp; });
+    const y0=1700-(lines.length-1)*40;
+    lines.forEach((ln,li)=>{ const tot=ln.reduce((s,i)=>s+ws[i],0)+sp*(ln.length-1); let x=W/2-tot/2; const y=y0+li*80;
+      ln.forEach(i=>{ const on=t>=words[i][1], cur=on && t<nextT(i);
+        if(cur){ const pp=eOut(prog(t,words[i][1],words[i][1]+.12)); g.fillStyle=D.gold; rr(x-10,y-36+(1-pp)*6,ws[i]+20,72,16); g.fill(); }
+        g.fillStyle= cur? D.ink : (on? D.cream : 'rgba(244,237,228,.35)'); g.textAlign='left'; g.fillText(words[i][0],x,y); x+=ws[i]+sp; }); });
+    g.restore(); });
+}
+function tiles(p){ if(p<=0) return; const xe=RX*p;
+  poly([[0,0,0],[xe,0,0],[xe,0,80],[0,0,80]],'#DCD6CE');
+  g.strokeStyle='rgba(120,110,100,.35)'; g.lineWidth=1.2;
+  for(let x=0;x<=xe;x+=30){ const a=P(x,0,0),b=P(x,0,80); g.beginPath(); g.moveTo(...a); g.lineTo(...b); g.stroke(); }
+  for(let z=0;z<=80;z+=20){ const a=P(0,0,z),b=P(xe,0,z); g.beginPath(); g.moveTo(...a); g.lineTo(...b); g.stroke(); } }
+function lampS(cx,cy,zb,sc,alpha){ if(alpha<=0) return; g.save(); g.globalAlpha*=alpha;
+  const top=P(cx,cy,RH), b=P(cx,cy,zb+28*sc); g.strokeStyle='rgba(30,25,20,.7)'; g.lineWidth=2; g.beginPath(); g.moveTo(...top); g.lineTo(...b); g.stroke();
+  const p=P(cx,cy,zb); const R=140*sc; const gl=g.createRadialGradient(p[0],p[1]+10,0,p[0],p[1]+10,R); gl.addColorStop(0,'rgba(255,220,160,.45)'); gl.addColorStop(1,'rgba(255,220,160,0)'); g.fillStyle=gl; g.beginPath(); g.arc(p[0],p[1]+10,R,0,7); g.fill();
+  g.translate(p[0],p[1]); g.scale(sc,sc);
+  g.fillStyle='#2B2420'; g.beginPath(); g.moveTo(-34,6); g.lineTo(34,6); g.lineTo(14,-26); g.lineTo(-14,-26); g.closePath(); g.fill();
+  g.fillStyle='#F0D3A2'; g.beginPath(); g.ellipse(0,6,34,8,0,0,7); g.fill(); g.restore(); }
+
+function sceneRoom(t){
+  const A=clamp(eOut(prog(t,.05,.6))*(1-eIn(prog(t,S(6)-.35,S(6)+.05))) + eOut(prog(t,S(11)-.1,S(11)+.4))*(1-eIn(prog(t,S(15)-.3,S(15)+.1))));
+  if(A<=0) return; g.save(); g.globalAlpha=A;
+  const fixed=t>=S(11)-.1; const fp=eIO(prog(t,S(11)+.2,S(11)+1.2));
+  const z=1+.05*prog(t,0,OUT); g.translate(540,820); g.scale(z,z); g.translate(-540,-820);
+  ISO.cy = 800 + (1-eOut(prog(t,.05,.8)))*60;
+  room(t);
+  if(!fixed) tiles(eIO(prog(t,S(5),S(5)+.9)));
+  // rug
+  if(!fixed) rugIso(150,210,110,150,'#8E6F57', t>S(3)+.25? D.bad:null, eOut(prog(t,S(3),S(3)+.4)));
+  else rugIso(lerp(150,70,fp),lerp(210,60,fp),lerp(110,240,fp),lerp(150,240,fp),'#8E6F57', fp>.9?D.good:null);
+  // outlet + cabinet
+  if(fixed) outlet(250,30,fp); else outlet(395,30);
+  box(330,0,0,120,45,80,'#6E5847', fixed?1-fp:1);
+  // sofa
+  const ds=at(1,.4), drop=eBack(prog(t,ds,ds+.6));
+  if(!fixed) sofa(0,60,340,'#A8A096',prog(t,ds,ds+.2),(1-drop)*240);
+  else sofa(0,lerp(60,40,fp),lerp(340,240,fp),'#A8A096');
+  if(fixed) box(lerp(150,170,fp),lerp(230,125,fp),0,70,110,40,'#B78F6A',fp);
+  // lamp
+  if(!fixed){ const sh=eIO(prog(t,at(4,.55),at(4,.85))); lampS(230,240,lerp(130,215,sh),lerp(1,.4,sh),eOut(prog(t,S(4),S(4)+.35))); }
+  else lampS(230,190,lerp(130,200,fp),1,1);
+  // door blocked pulse
+  if(!fixed && t>S(2) && t<S(6)){ const pu=.5+.5*Math.sin(t*7); g.save(); g.globalAlpha*=(.35+.4*pu)*eOut(prog(t,S(2),S(2)+.3)); g.lineWidth=6; poly([[0,300,0],[0,390,0],[0,390,210],[0,300,210]],null,D.bad); g.restore(); }
+  g.restore();
+  if(!fixed){
+    const pd=P(0,345,230); chip(pd[0]+40,pd[1]-30,'Salona sığmıyor',D.bad,win(t,S(2)+.1,S(6)-.1),eBack(prog(t,S(2)+.1,S(2)+.5)),26,'✕');
+    const pr=P(205,285,0); chip(pr[0]+90,pr[1]+50,'Halı küçük',D.bad,win(t,S(3)+.2,S(6)-.1),eBack(prog(t,S(3)+.2,S(3)+.6)),26,'✕');
+    const pl=P(230,240,130); const sw=t>=at(4,.6);
+    chip(pl[0]-60,pl[1]+70,sw?'Avize kayboldu':'Avize kafada',D.bad,win(t,S(4)+.2,S(6)-.1),eBack(prog(t,S(4)+.2,S(4)+.6))*(sw?1+.12*Math.max(0,1-(t-at(4,.6))*5):1),26,'✕');
+    const po=P(395,0,80); chip(po[0]+20,po[1]-120,'Priz yanlış yerde',D.bad,win(t,at(5,.55),S(6)-.1),eBack(prog(t,at(5,.55),at(5,.55)+.4)),26,'✕');
+  } else chip(540,1390,'Her şey ölçüsünde',D.good,win(t,E(14)-.3,S(15)),eBack(prog(t,E(14)-.3,E(14)+.1)),30,'✓');
+}
+function priceTag(t){
+  const a=win(t,S(1),S(2)+.3,.3,.3); if(a<=0) return; const p=eBack(prog(t,S(1),S(1)+.5));
+  g.save(); g.globalAlpha=a; g.translate(820,560); g.rotate(-.08+Math.sin(t*2)*.03); g.scale(p,p);
+  glass(-130,-60,260,120,24); g.font='500 22px P'; g.fillStyle=D.muted; g.textAlign='center'; g.textBaseline='middle'; g.fillText('Koltuk',0,-22);
+  g.font='700 44px P'; g.fillStyle=D.cream; g.fillText('₺ ₺ ₺',0,20); g.restore(); }
+function counter(t){
+  const a=win(t,S(2)+.1,S(6)-.05,.3,.3); if(a<=0) return; const ts=[S(2)+.1,S(3)+.2,S(4)+.2,at(5,.55)]; let n=0; ts.forEach(x=>{ if(t>=x) n++; });
+  g.save(); g.globalAlpha=a; glass(300,1380,480,150,30); g.font='500 26px P'; g.fillStyle=D.muted; g.textAlign='center'; g.textBaseline='middle'; g.fillText('Sonradan fark edilen hata',540,1425);
+  const bump=1+.25*Math.max(0,1-(t-ts[Math.max(0,n-1)])*4);
+  g.save(); g.translate(540,1482); g.scale(bump,bump); g.font='700 64px P'; g.fillStyle=D.bad; g.fillText(String(n),0,0); g.restore(); g.restore(); }
+function scale_(t){
+  const a=win(t,S(6)-.15,S(11),.35,.3); if(a<=0) return; g.save(); g.globalAlpha=a;
+  const tilt=eBack(prog(t,S(9),S(9)+.8))*.22; const cx=540, cy=800;
+  g.fillStyle='#3B312A'; rr(cx-10,cy,20,330,8); g.fill(); rr(cx-110,cy+320,220,24,12); g.fill();
+  g.save(); g.translate(cx,cy); g.rotate(-tilt);
+  g.fillStyle=D.gold; rr(-360,-9,720,18,9); g.fill(); g.beginPath(); g.arc(0,0,22,0,7); g.fill();
+  for(const [sx,side] of [[-330,'L'],[330,'R']]){ g.save(); g.translate(sx,0); g.rotate(tilt);
+    g.strokeStyle=D.gold; g.lineWidth=3; g.beginPath(); g.moveTo(0,0); g.lineTo(-110,200); g.moveTo(0,0); g.lineTo(110,200); g.stroke();
+    g.fillStyle=D.gold; rr(-130,198,260,16,8); g.fill();
+    if(side==='L'){ const labs=['Koltuk','Halı','Avize','Priz']; labs.forEach((l,i)=>{ const t0=at(7,.1)+i*.2; const pp=eBack(prog(t,t0,t0+.35)); if(pp<=0) return; g.save(); g.translate(0,170-i*62-(1-pp)*120); g.globalAlpha*=clamp(pp);
+        g.fillStyle='rgba(240,122,95,.18)'; rr(-115,-26,230,52,14); g.fill(); g.strokeStyle=D.bad; g.lineWidth=2.5; rr(-115,-26,230,52,14); g.stroke();
+        g.fillStyle=D.cream; g.font='600 26px P'; g.textAlign='center'; g.textBaseline='middle'; g.fillText(l+'  ✕',0,1); g.restore(); }); }
+    else { const pp=eBack(prog(t,S(6)+.1,S(6)+.5)); g.save(); g.translate(0,140); g.scale(pp,pp); glass(-120,-55,240,110,20,'rgba(139,203,147,.7)');
+        g.fillStyle=D.cream; g.font='italic 600 40px L'; g.textAlign='center'; g.textBaseline='middle'; g.fillText('İç mimar',0,2); g.restore(); }
+    g.restore(); }
+  g.restore();
+  g.save(); g.globalAlpha*=eOut(prog(t,S(9),S(9)+.4)); g.font='600 30px P'; g.fillStyle=D.muted; g.textAlign='center'; g.fillText('Küçük hatalar toplanınca:',540,1300); g.restore();
+  const tp=eBack(prog(t,S(10),S(10)+.45)); if(tp>0){ g.save(); g.translate(540,1375); g.scale(tp,tp); g.font='700 60px P'; g.fillStyle=D.bad; g.textAlign='center'; g.fillText('bir tadilat daha',0,0); g.restore(); }
+  g.restore(); }
+function steps(t){
+  const a=win(t,S(12)-.2,S(15),.35,.3); if(a<=0) return; g.save(); g.globalAlpha=a;
+  const labs=['Plan','Sıra','Alışveriş']; const y=1520; const xs=[230,540,850]; const ts=[S(12),S(13),S(14)];
+  g.strokeStyle='rgba(217,181,127,.35)'; g.lineWidth=3; g.setLineDash([6,10]); g.beginPath(); g.moveTo(xs[0],y); g.lineTo(xs[0]+(xs[2]-xs[0])*eIO(prog(t,S(12),S(14)+.3)),y); g.stroke(); g.setLineDash([]);
+  labs.forEach((l,i)=>{ const p=eBack(prog(t,ts[i]-.05,ts[i]+.35)); if(p<=0) return; g.save(); g.translate(xs[i],y); g.scale(p,p);
+    glass(-125,-62,250,124,62,'rgba(139,203,147,.6)'); g.fillStyle=D.good; g.beginPath(); g.arc(-72,0,24,0,7); g.fill();
+    g.fillStyle=D.ink; g.font='700 24px P'; g.textAlign='center'; g.textBaseline='middle'; g.fillText(String(i+1),-72,1);
+    g.fillStyle=D.cream; g.font='600 32px P'; g.textAlign='left'; g.fillText(l,-38,2); g.restore(); });
+  g.restore(); }
+function cta(t){
+  const a=win(t,S(15)-.1,OUT+.1,.35,.3); if(a<=0) return; g.save(); g.globalAlpha=a;
+  // comment bubble icon
+  const bp=eBack(prog(t,S(15),S(15)+.5)); g.save(); g.translate(540,620); g.scale(bp,bp); g.rotate(Math.sin(t*3)*.04);
+  glass(-110,-85,220,150,40,'rgba(217,181,127,.7)'); g.fillStyle='rgba(30,25,20,.86)'; g.beginPath(); g.moveTo(-30,63); g.lineTo(-62,112); g.lineTo(10,63); g.fill();
+  g.fillStyle=D.gold; for(let k=-1;k<=1;k++){ g.beginPath(); g.arc(k*50,-10,13+3*Math.max(0,Math.sin(t*6-k)),0,7); g.fill(); } g.restore();
+  headline(t,S(15),[[['Senin','n'],['evinde','n']],[['sonradan','n'],['fark','n'],['ettiğin','n']],[['hata','i'],['ne','n'],['oldu?','n']]],900,76,.06);
+  const yA=eOut(prog(t,S(16),S(16)+.4)); if(yA>0){ g.save(); g.globalAlpha*=yA; g.font='700 50px P'; g.fillStyle=D.good; g.textAlign='center'; g.fillText('Yorumlara yaz',540,1300);
+    g.strokeStyle=D.good; g.lineWidth=7; g.lineCap='round'; const yy=1340+Math.sin(t*6)*8; g.beginPath(); g.moveTo(540,yy); g.lineTo(540,yy+60); g.moveTo(515,yy+35); g.lineTo(540,yy+62); g.lineTo(565,yy+35); g.stroke(); g.restore(); }
+  g.restore(); }
+function outro(t){
+  const p=prog(t,OUT,OUT+.7); if(p<=0) return;
+  const R=eIO(p)*Math.hypot(W,H);
+  g.save(); g.beginPath(); g.arc(W/2,960,R,0,7); g.clip();
+  const gr=g.createRadialGradient(W/2,900,50,W/2,960,1300); gr.addColorStop(0,'#3A302A'); gr.addColorStop(1,'#120F0C'); g.fillStyle=gr; g.fillRect(0,0,W,H);
+  const lp_=eOut(prog(t,OUT+.45,OUT+1.3)); const L=imgs.logoW, h=lerp(380,420,lp_), w=L.width/L.height*h;
+  g.globalAlpha=lp_; g.drawImage(L,W/2-w/2,800-h/2+(1-lp_)*40,w,h);
+  const ln=eIO(prog(t,OUT+1.0,OUT+1.7)); g.globalAlpha=1; g.strokeStyle=D.gold; g.lineWidth=3; g.beginPath(); g.moveTo(W/2-140*ln,1060); g.lineTo(W/2+140*ln,1060); g.stroke();
+  const t1=eOut(prog(t,OUT+1.2,OUT+1.8)); g.globalAlpha=t1; g.font='300 46px P'; g.fillStyle=D.cream; g.textAlign='center'; g.textBaseline='middle';
+  g.letterSpacing='14px'; g.fillText('İÇ MİMARLIK',W/2+7,1130+(1-t1)*20); g.letterSpacing='0px';
+  const t2=eOut(prog(t,OUT+1.6,OUT+2.2)); g.globalAlpha=t2; g.font='700 40px P'; g.fillStyle=D.gold; g.fillText('#SantimiSantimine',W/2,1250+(1-t2)*20);
+  g.font='italic 500 36px L'; g.fillStyle='rgba(244,237,228,.8)'; g.fillText('Önce ölçü, sonra alışveriş.',W/2,1320+(1-t2)*20);
+  g.globalAlpha=eIn(prog(t,END-.35,END)); g.fillStyle='#000'; g.fillRect(0,0,W,H);
+  g.restore(); }
+
+window.draw=function(t){
+  g.setTransform(1,0,0,1,0,0); g.globalAlpha=1; g.filter='none';
+  bg(t); topBar();
+  const h1=1-eIn(prog(t,S(2)-.3,S(2))); if(h1>0){ g.save(); g.globalAlpha=h1; headline(t,S(0)-.05,[[['İç','n'],['mimar','n'],['pahalı','i'],['mı?','n']]],320,84); g.restore(); }
+  const h2=win(t,S(2),S(11),.01,.3); if(h2>0){ g.save(); g.globalAlpha=h2; headline(t,S(2),[[['Küçük','n'],['hatalar,','n']],[['büyük','i'],['fatura.','n']]],300,74); g.restore(); }
+  const h3=win(t,S(11),S(15),.01,.3); if(h3>0){ g.save(); g.globalAlpha=h3; headline(t,S(11),[[['Önce','n'],['ölçü,','i']],[['sonra','n'],['alışveriş.','n']]],300,74); g.restore(); }
+  sceneRoom(t); priceTag(t); counter(t); scale_(t); steps(t); cta(t);
+  captions(t);
+  for(const tt of [S(2),S(6),S(11),S(15)]){ const p=prog(t,tt-.25,tt+.35); if(p>0&&p<1){ const x=lerp(-400,W+400,eIO(p)); const sw=g.createLinearGradient(x-260,0,x+260,0); sw.addColorStop(0,'rgba(255,230,190,0)'); sw.addColorStop(.5,'rgba(255,230,190,.16)'); sw.addColorStop(1,'rgba(255,230,190,0)'); g.fillStyle=sw; g.fillRect(0,0,W,H); } }
+  outro(t);
+  post(t);
+};
+</script></body></html>
