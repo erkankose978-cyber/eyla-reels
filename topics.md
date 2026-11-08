@@ -1,7 +1,7 @@
 # Konu sırası (her gün 21:30)
 
 - [x] perde — Perde kaç metre alınır? (2026-11-07, media 17985609626899066)
-- [ ] masa — Beğendiğiniz masa 4 kişilik, siz 6 kişilik yaptıracaksınız. Kaç santim olmalı? | Hasan
+- [x] masa — Beğendiğiniz masa 4 kişilik, siz 6 kişilik yaptıracaksınız. Kaç santim olmalı? | Hasan (2026-11-08, media 18171584287477361)
       Kişi başı 60 cm genişlik · 6 kişilik dikdörtgen 180 × 90 cm (uçlara da birer kişi → 160–180 cm) · yuvarlak 6 kişi Ø 120–130 cm · masa çevresinde sandalye çekmek için en az 90 cm geçiş. Kanca: "Beğendiğiniz masa 4 kişilik, siz 6 kişilik yaptıracaksınız. Peki kaç santim olmalı?"
 - [ ] bar-taburesi — Bar taburesi kaç cm olmalı? | Piko
       Oturma yüksekliği = tezgâh − 25–30 cm (90 cm tezgâh → 60–65 cm; 105 cm bar → 75 cm) · tabureler arası (merkezden merkeze) 60 cm · tezgâh altında diz için 25–30 cm çıkıntı. Kanca: "Tabureye oturdunuz, diziniz tezgâha çarpıyor mu?"
