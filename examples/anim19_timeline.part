@@ -1,0 +1,159 @@
+// ---------- Masa kaç santim (cue-driven, 13 phrases) ----------
+const CU=window.CUES, S=i=>CU[i].s, E=i=>CU[i].e, at=(i,f)=>S(i)+(E(i)-S(i))*f;
+const OUT=window.OUTRO, END=window.END;
+const TXT=['Beğendiğiniz masa dört kişilik,','siz altı kişilik yaptıracaksınız.','Peki kaç santim olmalı?','Kural basit:','kişi başına altmış santim genişlik.','Altı kişilik dikdörtgen masa yüz seksene doksan santim olur.','Uçlara da birer kişi oturacaksa','yüz altmış ile yüz seksen yeterli.','Yuvarlak isterseniz çap yüz yirmi ile yüz otuz santim.','Bir de masanın çevresinde, sandalyeyi rahat çekmek için','en az doksan santim boşluk bırakın.','Sizin masanız kaç santim?','Yorumlara yazın.'];
+const GROUPS=[[0],[1],[2],[3,4],[5],[6],[7],[8],[9],[10]];
+const WT=TXT.map((s,i)=>{ const ws=s.split(' '); const tot=ws.reduce((a,w)=>a+w.length+1,0); let acc=0; return ws.map(w=>{ const t0=S(i)+(E(i)-S(i))*acc/tot; acc+=w.length+1; return [w,t0]; }); });
+function captions(t){
+  GROUPS.forEach((gr,gi)=>{
+    const t0=S(gr[0])-.08, t1= gi<GROUPS.length-1 ? S(GROUPS[gi+1][0])-.08 : S(11)-.1;
+    const a=win(t,t0,t1,.15,.12); if(a<=0) return;
+    const words=[].concat(...gr.map(i=>WT[i])); const nextT=k=> k+1<words.length? words[k+1][1] : E(gr[gr.length-1])+.2;
+    g.save(); g.globalAlpha=a; g.font='600 48px P'; g.textBaseline='middle';
+    const sp=15, ws=words.map(w=>g.measureText(w[0]).width); const lines=[[]]; let lw=0;
+    words.forEach((w,i)=>{ if(lw+ws[i]>900 && lines[lines.length-1].length){ lines.push([]); lw=0; } lines[lines.length-1].push(i); lw+=ws[i]+sp; });
+    const y0=1720-(lines.length-1)*38;
+    lines.forEach((ln,li)=>{ const tot=ln.reduce((s,i)=>s+ws[i],0)+sp*(ln.length-1); let x=W/2-tot/2; const y=y0+li*76;
+      ln.forEach(i=>{ const on=t>=words[i][1], cur=on && t<nextT(i);
+        if(cur){ g.fillStyle=D.gold; rr(x-10,y-34,ws[i]+20,68,15); g.fill(); }
+        g.fillStyle= cur? D.ink : (on? D.cream : 'rgba(244,237,228,.35)'); g.textAlign='left'; g.fillText(words[i][0],x,y); x+=ws[i]+sp; }); });
+    g.restore(); });
+}
+function dim(x1,y1,x2,y2,label,col,a,offx=0,offy=0){
+  if(a<=0) return; g.save(); g.globalAlpha*=a; g.strokeStyle=col; g.lineWidth=3.5; g.lineCap='round';
+  const p=eOut(clamp(a*1.2)); const mx=(x1+x2)/2, my=(y1+y2)/2; const hx=(x2-x1)/2*p, hy=(y2-y1)/2*p;
+  g.beginPath(); g.moveTo(mx-hx,my-hy); g.lineTo(mx+hx,my+hy); g.stroke();
+  const vx=y2-y1, vy=-(x2-x1), L=Math.hypot(vx,vy)||1, ux=vx/L*13, uy=vy/L*13;
+  for(const [x,y] of [[mx-hx,my-hy],[mx+hx,my+hy]]){ g.beginPath(); g.moveTo(x-ux,y-uy); g.lineTo(x+ux,y+uy); g.stroke(); }
+  g.restore(); if(label) chip(mx+offx,my+offy,label,col,a,1,25);
+}
+function dim(x1,y1,x2,y2,label,col,a,offx=0,offy=0){
+  if(a<=0) return; g.save(); g.globalAlpha*=a; g.strokeStyle=col; g.lineWidth=3.5; g.lineCap='round';
+  const p=eOut(clamp(a*1.2)); const mx=(x1+x2)/2, my=(y1+y2)/2; const hx=(x2-x1)/2*p, hy=(y2-y1)/2*p;
+  g.beginPath(); g.moveTo(mx-hx,my-hy); g.lineTo(mx+hx,my+hy); g.stroke();
+  const vx=y2-y1, vy=-(x2-x1), L=Math.hypot(vx,vy)||1, ux=vx/L*13, uy=vy/L*13;
+  for(const [x,y] of [[mx-hx,my-hy],[mx+hx,my+hy]]){ g.beginPath(); g.moveTo(x-ux,y-uy); g.lineTo(x+ux,y+uy); g.stroke(); }
+  g.restore(); if(label) chip(mx+offx,my+offy,label,col,a,1,25);
+}
+// ===== plan view (top-down) =====
+const CX=540, CY=1000;
+const D2R=Math.PI/180;
+// layout: table w,d,round(0..1), chairs [x,y,rotDeg,alpha]
+const side=(x,y)=>[x,y,y<0?-90:90,1];
+const LAY={
+  L4:{w:120,d:80,r:0,ch:[side(-30,-58),side(30,-58),side(-30,58),side(30,58),[-78,0,180,0],[78,0,0,0]]},
+  SQ:{w:120,d:80,r:0,ch:[side(-40,-58),side(40,-58),side(-40,58),side(40,58),side(0,-58),side(0,58)]},
+  L6:{w:180,d:90,r:0,ch:[side(-60,-63),side(60,-63),side(-60,63),side(60,63),side(0,-63),side(0,63)]},
+  LE:{w:170,d:90,r:0,ch:[side(-30,-63),side(30,-63),side(-30,63),side(30,63),[-103,0,180,1],[103,0,0,1]]},
+  RO:{w:125,d:125,r:1,ch:[-120,-60,120,60,180,0].map(a=>[Math.cos(a*D2R)*81,Math.sin(a*D2R)*81,a,1])},
+};
+function keys(){ return [[0,'L4'],[S(1)+.15,'SQ'],[S(3),'L6'],[S(6)+.1,'LE'],[S(8),'RO'],[S(9),'L6']]; }
+function lay(t){
+  const K=keys(); let i=0; while(i+1<K.length && t>=K[i+1][0]) i++;
+  const A=LAY[K[i][1]]; if(i===0 && t<K[0][0]) return A;
+  const prevA= i>0? LAY[K[i-1][1]] : A; const p=eIO(prog(t,K[i][0],K[i][0]+.7));
+  const P0=prevA, P1=A; const L=(a,b)=>lerp(a,b,p);
+  return {w:L(P0.w,P1.w),d:L(P0.d,P1.d),r:L(P0.r,P1.r),name:K[i][1],p,
+    ch:P1.ch.map((c,k)=>{ const o=P0.ch[k]; let da=c[2]-o[2]; if(da>180) da-=360; if(da<-180) da+=360; return [L(o[0],c[0]),L(o[1],c[1]),o[2]+da*p,L(o[3],c[3])]; })};
+}
+function chair(x,y,rot,a,K,bad){
+  if(a<=0) return; g.save(); g.globalAlpha*=a; g.translate(CX+x*K,CY+y*K); g.rotate(rot*D2R); const s=K;
+  g.shadowColor='rgba(0,0,0,.45)'; g.shadowBlur=18; g.shadowOffsetY=6;
+  g.fillStyle='#8E7B66'; rr(-20*s,-21*s,40*s,42*s,7*s); g.fill(); g.shadowColor='transparent';
+  g.fillStyle='#5E4E40'; rr(14*s,-22*s,8*s,44*s,4*s); g.fill();
+  if(bad){ g.strokeStyle=D.bad; g.lineWidth=4; rr(-20*s,-21*s,42*s,42*s,7*s); g.stroke(); }
+  g.restore(); }
+function tableTop(w,d,r,K){
+  const X=CX-w/2*K, Y=CY-d/2*K, rad=lerp(14,Math.min(w,d)/2*K,r);
+  g.save(); g.shadowColor='rgba(0,0,0,.55)'; g.shadowBlur=50; g.shadowOffsetY=20;
+  const gr=g.createLinearGradient(X,Y,X+w*K,Y+d*K); gr.addColorStop(0,'#C9A27A'); gr.addColorStop(1,'#9C7652'); g.fillStyle=gr; rr(X,Y,w*K,d*K,rad); g.fill(); g.restore();
+  g.save(); rr(X,Y,w*K,d*K,rad); g.clip(); g.strokeStyle='rgba(60,40,20,.12)'; g.lineWidth=2;
+  for(let k=1;k<14;k++){ const yy=Y+d*K*k/14; g.beginPath(); g.moveTo(X,yy); for(let xx=X;xx<=X+w*K;xx+=40) g.lineTo(xx,yy+Math.sin(xx*.02+k)*3); g.stroke(); } g.restore();
+  g.strokeStyle='rgba(255,240,215,.35)'; g.lineWidth=2; rr(X+3,Y+3,w*K-6,d*K-6,Math.max(0,rad-3)); g.stroke();
+}
+function scene(t){
+  const A=win(t,0,S(11)+.1,.5,.35); if(A<=0) return; g.save(); g.globalAlpha=A;
+  const L=lay(t);
+  const cl=eIO(prog(t,S(9),S(9)+.8)); const K=lerp(3.3,2.35,cl);
+  const z=1+.03*prog(t,0,S(11)); g.translate(CX,CY); g.scale(z,z); g.translate(-CX,-CY);
+  // clearance zone
+  if(cl>0){ g.save(); g.globalAlpha*=cl; const cw=(L.w+180)*K, cd=(L.d+180)*K;
+    g.fillStyle='rgba(139,203,147,.08)'; rr(CX-cw/2,CY-cd/2,cw,cd,20); g.fill();
+    g.strokeStyle=D.good; g.lineWidth=4; g.setLineDash([16,10]); rr(CX-cw/2,CY-cd/2,cw,cd,20); g.stroke(); g.setLineDash([]);
+    // walls hint
+    g.strokeStyle='rgba(244,237,228,.55)'; g.lineWidth=10; g.strokeRect(CX-cw/2-10,CY-cd/2-10,cw+20,cd+20); g.restore(); }
+  const bad = L.name==='SQ' && t<S(3)+.3;
+  // rug shadow
+  L.ch.forEach(c=>{ if(c[1]<0||Math.abs(c[0])>L.w/2) chair(c[0],c[1],c[2],c[3],K,bad); });
+  tableTop(L.w,L.d,L.r,K);
+  L.ch.forEach(c=>{ if(!(c[1]<0||Math.abs(c[0])>L.w/2)) chair(c[0],c[1],c[2],c[3],K,bad); });
+  // ---- overlays ----
+  const top=CY-L.d/2*K, bot=CY+L.d/2*K;
+  chip(CX,CY,'4 kişilik',D.gold,win(t,.5,S(1)+.1,.3,.25),eBack(prog(t,.5,.9)),28);
+  chip(CX,CY,'Sığmıyor',D.bad,win(t,S(1)+.6,S(3)+.1,.3,.25),eBack(prog(t,S(1)+.6,S(1)+1)),28,'✕');
+  if(bad){ const pu=.5+.5*Math.sin(t*8); g.save(); g.globalAlpha*=.4+.4*pu; g.strokeStyle=D.bad; g.lineWidth=5; g.setLineDash([12,8]); const w=(L.w+40)*K,h=(L.d+110)*K; g.strokeRect(CX-w/2,CY-h/2,w,h); g.setLineDash([]); g.restore(); }
+  // 60 cm per seat (top chairs)
+  const sA=win(t,at(4,.15),S(6)+.1,.35,.3);
+  if(sA>0) for(let k=-1;k<=1;k++){ const x0=CX+(k*60-30)*K+6, x1=CX+(k*60+30)*K-6, y=CY-(45+63)*K+6; const aa=sA*eOut(prog(t,at(4,.15)+(k+1)*.15,at(4,.15)+(k+1)*.15+.4)); dim(x0,y,x1,y,null,D.gold,aa); chip((x0+x1)/2,y-42,'60',D.gold,aa,1,24); }
+  // 180 x 90
+  const dA=win(t,at(5,.3),S(6)+.1,.35,.3);
+  if(dA>0){ dim(CX-90*K,bot+(63+40)*K*0+ (63+28)*K,CX+90*K,bot+(63+28)*K - 0,null,D.gold2,dA); chip(CX,bot+(63+28)*K+0,'180 cm',D.gold2,dA,1,27);
+    const xx=CX+90*K+30; dim(xx,top,xx,bot,null,D.gold2,dA); chip(xx+70,CY,'90',D.gold2,dA,1,27); }
+  // ends
+  const eA=win(t,at(6,.4),S(8)+.1,.35,.3);
+  if(eA>0){ chip(CX-103*K,CY-34*K-30,'+1',D.good,eA,eBack(prog(t,at(6,.4),at(6,.4)+.4)),26,'✓'); chip(CX+103*K,CY-34*K-30,'+1',D.good,eA,eBack(prog(t,at(6,.4),at(6,.4)+.4)),26,'✓'); }
+  const e2=win(t,S(7),S(8)+.1,.3,.3); if(e2>0){ dim(CX-L.w/2*K,bot+(63+28)*K,CX+L.w/2*K,bot+(63+28)*K,null,D.gold2,e2); chip(CX,bot+(63+28)*K,'160–180 cm',D.gold2,e2,eBack(prog(t,S(7),S(7)+.4)),27); }
+  // round
+  const rA=win(t,at(8,.35),S(9)+.1,.35,.3);
+  if(rA>0){ dim(CX-62.5*K+8,CY,CX+62.5*K-8,CY,null,D.gold2,rA); chip(CX,CY-44,'Ø 120–130 cm',D.gold2,rA,eBack(prog(t,at(8,.35),at(8,.35)+.4)),27); }
+  // clearance dims
+  const cA=win(t,at(10,.2),S(11)+.1,.35,.3);
+  if(cA>0){ const y1=CY-L.d/2*K, y0=CY-(L.d/2+90)*K; const xx=CX+(L.w/2+45)*K; dim(xx,y0,xx,y1,null,D.good,cA); chip(xx,(y0+y1)/2,'90 cm',D.good,cA,1,26);
+    const x1=CX+L.w/2*K, x2=CX+(L.w/2+90)*K; dim(x1,CY+60*K+40,x2,CY+60*K+40,null,D.good,cA); chip((x1+x2)/2,CY+60*K+90,'90 cm',D.good,cA,1,26);
+    chip(CX,CY,'Sandalye rahat çekilir',D.good,win(t,at(10,.55),S(11)+.1,.3,.3),eBack(prog(t,at(10,.55),at(10,.55)+.4)),26,'✓'); }
+  g.restore();
+}
+function cta(t){
+  const a=win(t,S(11)-.1,OUT+.1,.35,.3); if(a<=0) return; g.save(); g.globalAlpha=a;
+  const bp=eBack(prog(t,S(11),S(11)+.5)); g.save(); g.translate(540,640); g.scale(bp,bp); g.rotate(Math.sin(t*3)*.04);
+  glass(-110,-85,220,150,40,'rgba(217,181,127,.7)'); g.fillStyle='rgba(30,25,20,.86)'; g.beginPath(); g.moveTo(-30,63); g.lineTo(-62,112); g.lineTo(10,63); g.fill();
+  g.fillStyle=D.gold; for(let k=-1;k<=1;k++){ g.beginPath(); g.arc(k*50,-10,13+3*Math.max(0,Math.sin(t*6-k)),0,7); g.fill(); } g.restore();
+  headline(t,S(11),[[['Sizin','n'],['masanız','n']],[['kaç','i'],['santim?','i']]],920,80,.07);
+  g.save(); g.globalAlpha*=eOut(prog(t,S(11)+.6,S(11)+1)); g.font='italic 600 46px L'; g.fillStyle=D.gold2; g.textAlign='center'; g.fillText('( kişi ÷ 2 ) × 60 = ___ cm',540,1110); g.restore();
+  const yA=eOut(prog(t,S(12),S(12)+.4)); if(yA>0){ g.save(); g.globalAlpha*=yA; g.font='700 50px P'; g.fillStyle=D.good; g.textAlign='center'; g.fillText('Yorumlara yazın',540,1280);
+    g.strokeStyle=D.good; g.lineWidth=7; g.lineCap='round'; const yy=1320+Math.sin(t*6)*8; g.beginPath(); g.moveTo(540,yy); g.lineTo(540,yy+60); g.moveTo(515,yy+35); g.lineTo(540,yy+62); g.lineTo(565,yy+35); g.stroke(); g.restore(); }
+  g.restore(); }
+function outro(t){
+  const p=prog(t,OUT,OUT+.7); if(p<=0) return;
+  const R=eIO(p)*Math.hypot(W,H);
+  g.save(); g.beginPath(); g.arc(W/2,960,R,0,7); g.clip();
+  const gr=g.createRadialGradient(W/2,900,50,W/2,960,1300); gr.addColorStop(0,'#3A302A'); gr.addColorStop(1,'#120F0C'); g.fillStyle=gr; g.fillRect(0,0,W,H);
+  const lp_=eOut(prog(t,OUT+.45,OUT+1.3)); const L=imgs.logoW, h=lerp(380,420,lp_), w=L.width/L.height*h;
+  g.globalAlpha=lp_; g.drawImage(L,W/2-w/2,800-h/2+(1-lp_)*40,w,h);
+  const ln=eIO(prog(t,OUT+1.0,OUT+1.7)); g.globalAlpha=1; g.strokeStyle=D.gold; g.lineWidth=3; g.beginPath(); g.moveTo(W/2-140*ln,1060); g.lineTo(W/2+140*ln,1060); g.stroke();
+  const t1=eOut(prog(t,OUT+1.2,OUT+1.8)); g.globalAlpha=t1; g.font='300 46px P'; g.fillStyle=D.cream; g.textAlign='center'; g.textBaseline='middle';
+  g.letterSpacing='14px'; g.fillText('İÇ MİMARLIK',W/2+7,1130+(1-t1)*20); g.letterSpacing='0px';
+  const t2=eOut(prog(t,OUT+1.6,OUT+2.2)); g.globalAlpha=t2; g.font='700 40px P'; g.fillStyle=D.gold; g.fillText('#SantimiSantimine',W/2,1250+(1-t2)*20);
+  g.font='italic 500 36px L'; g.fillStyle='rgba(244,237,228,.8)'; g.fillText('Her gün bir iç mimarlık kuralı',W/2,1320+(1-t2)*20);
+  const t3=eOut(prog(t,OUT+2.0,OUT+2.6)); g.globalAlpha=t3*.5; g.font='400 23px P'; g.fillStyle=D.cream;
+  g.fillText('Ölçüler genel öneridir; sandalye ve masa ayağı tipine göre değişebilir.',W/2,1640);
+  g.globalAlpha=eIn(prog(t,END-.35,END)); g.fillStyle='#000'; g.fillRect(0,0,W,H);
+  g.restore(); }
+const HEADS=[
+  [S(0)-.05,S(3),[[['6','i'],['kişilik','n'],['masa','n']],[['kaç','i'],['santim?','i']]]],
+  [S(3),S(6),[[['Kişi','n'],['başı','n']],[['60','i'],['cm','i']]]],
+  [S(6),S(8),[[['Uçlarda','n'],['da','n'],['kişi:','n']],[['160–180','i'],['cm','i']]]],
+  [S(8),S(9),[[['Yuvarlak:','n']],[['Ø','i'],['120–130','i'],['cm','i']]]],
+  [S(9),S(11),[[['Çevresinde','n']],[['90','i'],['cm','i'],['boşluk','n']]]],
+];
+window.draw=function(t){
+  g.setTransform(1,0,0,1,0,0); g.globalAlpha=1; g.filter='none';
+  bg(t); topBar();
+  HEADS.forEach(([a,b,lines])=>{ const h=win(t,a,b,.01,.3); if(h>0){ g.save(); g.globalAlpha=h; headline(t,a,lines,300,74); g.restore(); } });
+  scene(t); cta(t);
+  captions(t);
+  for(const tt of [S(3),S(6),S(8),S(9),S(11)]){ const p=prog(t,tt-.25,tt+.35); if(p>0&&p<1){ const x=lerp(-400,W+400,eIO(p)); const sw=g.createLinearGradient(x-260,0,x+260,0); sw.addColorStop(0,'rgba(255,230,190,0)'); sw.addColorStop(.5,'rgba(255,230,190,.16)'); sw.addColorStop(1,'rgba(255,230,190,0)'); g.fillStyle=sw; g.fillRect(0,0,W,H); } }
+  outro(t);
+  post(t);
+};
+</script></body></html>
