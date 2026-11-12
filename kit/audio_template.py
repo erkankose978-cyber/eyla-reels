@@ -113,14 +113,13 @@ sl = lambda i, f: CUES[i]['s'] + (CUES[i]['e'] - CUES[i]['s']) * f
 def thud(d=0.35):
     x = np.arange(int(d * SR)) / SR; ph = 2 * np.pi * np.cumsum(45 + 120 * np.exp(-x * 25)) / SR
     return np.sin(ph) * np.exp(-x * 10)
-add(S(0), whoosh(0.4), 0.08); add(at(0, .5), buzz(0.25), 0.12)
-add(S(2), whoosh(0.6), 0.12); add(at(3, .15) + .9, thud(), 0.25); add(at(3, .5), tick(), 0.3); add(at(3, .5) + .15, tick(1500), 0.25)
-add(S(5), whoosh(0.6), 0.12); add(S(5) + .2, thud(), 0.2); add(at(6, .3), pop(900, 500, 0.1), 0.25)
-add(S(7), whoosh(0.6), 0.12); add(S(7) + .1, buzz(0.25), 0.1); add(at(8, .2), whoosh(0.7), 0.1); add(at(8, .75), chime((79, 83), 0.8), 0.2)
-add(S(10), pop(1000, 600), 0.25)
-add(S(11), whoosh(0.6), 0.12); add(at(12, .1), pop(1000, 600), 0.25); add(at(12, .2), pop(1100, 650), 0.25); add(at(12, .3), pop(1200, 700), 0.25)
-add(at(13, .3), chime((76, 80, 83), 1.0), 0.2)
-add(S(14), whoosh(0.5), 0.1); add(S(14) + .1, pop(), 0.3); add(S(15), pop(1300, 800, 0.07), 0.3)
+add(S(0), whoosh(0.4), 0.08); add(at(0, .4), buzz(0.25), 0.12)
+add(at(1, .2), tick(), 0.25)
+add(S(2), whoosh(0.6), 0.12); add(at(3, .2), thud(), 0.22); add(at(3, .6), tick(), 0.3); add(at(3, .6) + .15, tick(1500), 0.25)
+add(S(5), whoosh(0.6), 0.12); add(at(5, .5), pop(900, 500, 0.1), 0.25); add(at(6, .05), thud(), 0.2)
+add(S(7), whoosh(0.6), 0.12); add(at(8, .3), pop(1000, 600), 0.25); add(at(8, .6), chime((79, 83), 0.8), 0.2)
+add(S(9), whoosh(0.6), 0.12); add(at(10, .2), pop(1100, 650), 0.22); add(S(11), thud(), 0.18); add(at(11, .2), chime((76, 80, 83), 1.0), 0.2)
+add(S(12), whoosh(0.5), 0.1); add(S(12) + .1, pop(), 0.3); add(S(13), pop(1300, 800, 0.07), 0.3)
 add(OUTRO, whoosh(0.8), 0.1); add(OUTRO + .6, chime((72, 76, 79, 84), 1.6), 0.22)
 mix = voice + music + sfx
 st = np.stack([mix, mix], 1)
