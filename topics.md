@@ -9,7 +9,7 @@
       Tezgâhtan 55–60 cm yukarı (tezgâh 90 → alt kenar ~145–150) · derinlik 35 cm · ocak üstü davlumbaz için 65–75 cm · tavana kadar uzatıp en üst raf saklama. Kanca: "Üst dolap ya kafanıza çarpıyor ya da en üst rafa yetişemiyorsunuz."
 - [x] tablo — Tablo kaç cm yükseğe asılır? | Hasan (2026-11-11, media 17921386521530137)
       Tablonun merkezi yerden 145–150 cm (göz hizası) · kanepe/konsol üstünde alt kenar 20–25 cm yukarıda · tablo (veya grup) genişliği mobilyanın ~⅔'ü. Kanca: "Tablonuz duvarda kaybolmuş gibi mi duruyor? Çok yükseğe asmışsınız."
-- [ ] yatak-genisligi — Odanıza kaç cm yatak sığar? | Piko
+- [x] yatak-genisligi — Odanıza kaç cm yatak sığar? | Piko (2026-11-12, media 17904588297376013)
       Yatak eni = oda eni − 2 × 60 cm (iki yanda geçiş/komodin için) · ayak ucunda en az 70–90 cm geçiş · örn. 300 cm oda → en fazla 180'lik yatak. Kanca: "160'lık mı, 180'lik mi? Yatağı değil, odanızı ölçün."
 - [ ] priz-anahtar — Priz ve anahtar yükseklikleri | Hasan
       Priz yerden 30–40 cm · ışık anahtarı 105–110 cm (kapı kolu hizası, kasadan ~15 cm) · mutfak tezgâh üstü priz 105–110 cm (tezgâhtan 15–20 cm) · TV prizi TV'nin arkasında kalacak yükseklikte. Kanca: "Prizi ustanın keyfine bırakmayın, bu ölçüleri verin."
