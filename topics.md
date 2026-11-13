@@ -11,5 +11,5 @@
       Tablonun merkezi yerden 145–150 cm (göz hizası) · kanepe/konsol üstünde alt kenar 20–25 cm yukarıda · tablo (veya grup) genişliği mobilyanın ~⅔'ü. Kanca: "Tablonuz duvarda kaybolmuş gibi mi duruyor? Çok yükseğe asmışsınız."
 - [x] yatak-genisligi — Odanıza kaç cm yatak sığar? | Piko (2026-11-12, media 17904588297376013)
       Yatak eni = oda eni − 2 × 60 cm (iki yanda geçiş/komodin için) · ayak ucunda en az 70–90 cm geçiş · örn. 300 cm oda → en fazla 180'lik yatak. Kanca: "160'lık mı, 180'lik mi? Yatağı değil, odanızı ölçün."
-- [ ] priz-anahtar — Priz ve anahtar yükseklikleri | Hasan
+- [x] priz-anahtar — Priz ve anahtar yükseklikleri | Hasan (2026-11-13, media 17900294133405267)
       Priz yerden 30–40 cm · ışık anahtarı 105–110 cm (kapı kolu hizası, kasadan ~15 cm) · mutfak tezgâh üstü priz 105–110 cm (tezgâhtan 15–20 cm) · TV prizi TV'nin arkasında kalacak yükseklikte. Kanca: "Prizi ustanın keyfine bırakmayın, bu ölçüleri verin."
