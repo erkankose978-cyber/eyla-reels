@@ -13,3 +13,5 @@
       Yatak eni = oda eni − 2 × 60 cm (iki yanda geçiş/komodin için) · ayak ucunda en az 70–90 cm geçiş · örn. 300 cm oda → en fazla 180'lik yatak. Kanca: "160'lık mı, 180'lik mi? Yatağı değil, odanızı ölçün."
 - [x] priz-anahtar — Priz ve anahtar yükseklikleri | Hasan (2026-11-13, media 17900294133405267)
       Priz yerden 30–40 cm · ışık anahtarı 105–110 cm (kapı kolu hizası, kasadan ~15 cm) · mutfak tezgâh üstü priz 105–110 cm (tezgâhtan 15–20 cm) · TV prizi TV'nin arkasında kalacak yükseklikte. Kanca: "Prizi ustanın keyfine bırakmayın, bu ölçüleri verin."
+- [x] canak-lavabo — Çanak lavabo kaç cm'de olmalı? | Piko (2026-11-14, media 18020670659978396)
+      Lavabo üst kenarı yerden 85–90 cm · çanak ~15 cm → çanak altı dolap 70–75 cm · batarya ağzı çanağın kenarından 10–15 cm yukarıda. Kanca: "Çanak lavabo aldınız, şimdi neden her yere su sıçrıyor?"
