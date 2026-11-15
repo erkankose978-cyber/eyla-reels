@@ -1,0 +1,119 @@
+<script type="module">
+const THREE=window.THREE;
+const marbleC=marbleTex(), marbleMap=marbleC; marbleMap.repeat.set(3,3);
+const splashMap=streakTex(); splashMap.repeat.set(1.4,1);
+const flute=flutedTex();
+
+function kitchen(glossy){
+ const s=new THREE.Scene(); s.environment=ENV; s.background=new THREE.Color(0x2a221d);
+ const cab = glossy
+  ? new THREE.MeshPhysicalMaterial({color:0xbdaea0,roughness:.07,metalness:0,clearcoat:1,clearcoatRoughness:.02,envMapIntensity:1.25})
+  : new THREE.MeshStandardMaterial({color:0xb7a89a,roughness:.88,metalness:0,envMapIntensity:.6});
+ const carcass=new THREE.MeshStandardMaterial({color:0x1a1613,roughness:.8});
+ const black=new THREE.MeshStandardMaterial({color:0x0c0b0a,roughness:.45,metalness:.2});
+ const wallM=new THREE.MeshStandardMaterial({color:0x9c8b7d,roughness:.95});
+ const ceilM=new THREE.MeshStandardMaterial({color:0xcfc4b8,roughness:.95});
+ const floorM=new THREE.MeshPhysicalMaterial({map:marbleMap,roughness:glossy?.06:.62,clearcoat:glossy?1:0,clearcoatRoughness:.03,envMapIntensity:glossy?1:.5});
+ const topM=new THREE.MeshStandardMaterial({color:0xcbbba6,roughness:.4,map:splashMap});
+ const splashM=new THREE.MeshStandardMaterial({map:splashMap,roughness:.55});
+ const glassM=new THREE.MeshStandardMaterial({color:0x000000,emissive:0xffffff,emissiveMap:flute,emissiveIntensity:1.6,roughness:.3});
+ const ledM=new THREE.MeshBasicMaterial({color:0xffd9a0});ledM.color.multiplyScalar(3);
+ const ovenGlass=new THREE.MeshStandardMaterial({color:0x080706,roughness:.08,metalness:.5,envMapIntensity:1.5});
+ const ovenIn=new THREE.MeshBasicMaterial({color:0xff9a40});ovenIn.color.multiplyScalar(1.4);
+
+ const root=new THREE.Group(); s.add(root);
+ const add=(m,w,h,d,x,y,z,r)=>box(root,m,w,h,d,x,y,z,r);
+ // room
+ const floor=new THREE.Mesh(new THREE.PlaneGeometry(14,10),floorM);floor.rotation.x=-Math.PI/2;floor.position.set(0,0,2);floor.receiveShadow=true;s.add(floor);
+ add(wallM,14,3,.1,0,1.5,-.05,0); add(ceilM,14,.1,10,0,2.75,2,0);
+ add(wallM,.1,3,6,-3.25,1.5,2,0);
+ // ---- tall column (oven) x -3.2..-2.5
+ const tx0=-3.2,tw=.7;
+ add(carcass,tw,2.6,.62,tx0+tw/2,1.3,.31,0);
+ add(cab,tw-.006,.66,.02,tx0+tw/2,2.27,.63);   // top door
+ add(cab,tw-.006,.48,.02,tx0+tw/2,.36,.63);    // bottom drawer
+ add(black,tw-.04,.42,.03,tx0+tw/2,1.62,.62,.01); add(ovenGlass,tw-.12,.2,.01,tx0+tw/2,1.6,.64,0);
+ add(black,tw-.04,.56,.03,tx0+tw/2,1.0,.62,.01); add(ovenGlass,tw-.12,.32,.01,tx0+tw/2,.98,.64,0);
+ const ow=new THREE.Mesh(new THREE.PlaneGeometry(tw-.16,.26),ovenIn);ow.position.set(tx0+tw/2,.96,.646);root.add(ow);
+ // ---- base run x -2.5..3.0
+ const bx0=-2.5,bx1=3.2,bh=.9,plinth=.1;
+ add(black,bx1-bx0,plinth,.55,(bx0+bx1)/2,plinth/2,.27,0);
+ add(carcass,bx1-bx0,bh-plinth,.6,(bx0+bx1)/2,plinth+(bh-plinth)/2,.3,0);
+ let x=bx0; const widths=[.6,.6,.9,.6,.6,.9,.6]; widths.forEach((w,i)=>{
+  const cx=x+w/2; const hh=bh-plinth-.04;
+  if(i%3===2){ add(cab,w-.006,hh*.3-.004,.02,cx,plinth+hh*.85,.61); add(cab,w-.006,hh*.7-.004,.02,cx,plinth+hh*.35,.61); }
+  else add(cab,w-.006,hh-.004,.02,cx,plinth+hh/2,.61);
+  x+=w; });
+ // countertop + hob + sink
+ add(topM,bx1-bx0+.02,.03,.64,(bx0+bx1)/2,bh-.025,.32,.003);
+ add(black,.6,.006,.5,.1,bh-.007,.32,.002);
+ add(new THREE.MeshStandardMaterial({color:0x111,roughness:.3,metalness:.6}),.5,.01,.38,1.55,bh-.012,.32,.004);
+ const tap=new THREE.Mesh(new THREE.TorusGeometry(.13,.012,12,30,Math.PI),black);tap.position.set(1.55,bh+.19,.12);root.add(tap);
+ add(black,.025,.2,.025,1.68,bh+.1,.12,.008);
+ // backsplash
+ add(splashM,bx1-bx0,.58,.02,(bx0+bx1)/2,bh+.29,.01,0);
+ // upper cabinets
+ const uy0=bh+.58, uh=.82;
+ add(carcass,bx1-bx0,uh,.36,(bx0+bx1)/2,uy0+uh/2,.18,0);
+ x=bx0; while(x<bx1-.01){const w=.6; add(cab,w-.006,uh-.006,.02,x+w/2,uy0+uh/2,.37); x+=w;}
+ // led strip under uppers
+ add(ledM,bx1-bx0,.008,.02,(bx0+bx1)/2,uy0-.006,.3,0);
+ // niche row with fluted glass
+ const ny0=uy0+uh, nh=.32;
+ add(black,bx1-bx0,nh,.36,(bx0+bx1)/2,ny0+nh/2,.18,0);
+ x=bx0; while(x<bx1-.01){const w=.6;const g=new THREE.Mesh(new THREE.PlaneGeometry(w-.05,nh-.05),glassM);g.position.set(x+w/2,ny0+nh/2,.365);root.add(g);
+   const sp=new THREE.Mesh(new THREE.CircleGeometry(.02,16),ledM);sp.position.set(x+w/2,ny0+nh-.035,.37);root.add(sp); x+=w;}
+ add(black,bx1-bx0,2.7-(ny0+nh),.36,(bx0+bx1)/2,(ny0+nh+2.7)/2,.18,0);
+
+ // ---- lights
+ s.add(new THREE.HemisphereLight(0xfff1e0,0x3a2e25,.55));
+ const key=new THREE.DirectionalLight(0xfff0dc,1.6);key.position.set(4,4,6);key.castShadow=true;
+ key.shadow.mapSize.set(2048,2048);key.shadow.camera.left=-5;key.shadow.camera.right=5;key.shadow.camera.top=4;key.shadow.camera.bottom=-1;key.shadow.radius=6;key.shadow.bias=-.0004;s.add(key);
+ for(let i=0;i<4;i++){const p=new THREE.PointLight(0xffc98a,1.4,1.6,1.6);p.position.set(bx0+.6+i*1.4,uy0-.06,.32);s.add(p);}
+ for(let i=0;i<3;i++){const sp=new THREE.SpotLight(0xffe4c2,9,5,.55,.7,1.5);sp.position.set(-1.5+i*1.8,2.68,1.4);sp.target.position.set(-1.5+i*1.8,0,1.2);s.add(sp,sp.target);
+   const d=new THREE.Mesh(new THREE.CircleGeometry(.05,20),ledM);d.rotation.x=Math.PI/2;d.position.set(-1.5+i*1.8,2.695,1.4);s.add(d);}
+ // glossy floor: mirrored world under semi-transparent floor
+ if(glossy){
+  const m=root.clone();m.scale.y=-1;s.add(m);
+  floorM.transparent=true;floorM.opacity=.82;
+ }
+ return s;
+}
+const SM=kitchen(false), SG=kitchen(true);
+const cam=new THREE.PerspectiveCamera(52,1080/1920,.05,50);
+window.CAM=cam;
+
+function text(t){
+ const a=eo((t-.3)/.8);
+ X.save();X.globalAlpha=a;X.textAlign='center';
+ const g=X.createLinearGradient(0,0,0,520);g.addColorStop(0,'rgba(30,22,18,.55)');g.addColorStop(1,'rgba(30,22,18,0)');
+ X.fillStyle=g;X.fillRect(0,0,1080,520);
+ X.fillStyle='#efe3d6';X.font='300 128px P';X.letterSpacing='-2px';
+ X.fillText('MAT MI,',540,230-(1-a)*30);
+ X.font='italic 600 136px L';X.fillText('parlak mı?',540,370-(1-a)*30);
+ X.restore();
+ // labels
+ const b=eo((t-1.2)/.6);X.save();X.globalAlpha=b;X.font='500 34px P';X.letterSpacing='6px';X.fillStyle='rgba(255,255,255,.92)';
+ X.textAlign='center';X.fillText('MAT',window._div*0.5,1700);X.fillText('PARLAK',window._div+(1080-window._div)*.5,1700);X.restore();
+}
+window.draw=(t)=>{
+ // slow camera drift
+ const k=ease(clamp(t/8));
+ cam.position.set(lerp(2.3,1.9,k),lerp(1.45,1.38,k),lerp(4.2,3.7,k));
+ cam.lookAt(lerp(-.6,-.5,k),1.25,0);
+ // divider sweeps in then rests at centre with gentle sway
+ const div=540+Math.sin(t*.9)*40*clamp(t-2)+ (1-eo(t/1.6))*540;
+ window._div=div;
+ R.setScissorTest(true);
+ R.setViewport(0,0,1080,1920);
+ R.setScissor(0,0,div,1920);R.render(SM,cam);
+ R.setScissor(div,0,1080-div,1920);R.render(SG,cam);
+ R.setScissorTest(false);
+ X.drawImage(R.domElement,0,0);
+ X.fillStyle='rgba(255,255,255,.85)';X.fillRect(div-2,0,4,1920);
+ text(t);
+};
+await document.fonts.load('300 40px P');await document.fonts.load('italic 600 40px L');await document.fonts.load('500 40px P');
+window.ready=true;
+</script>
+</body></html>

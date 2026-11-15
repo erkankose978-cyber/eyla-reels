@@ -1,7 +1,7 @@
 name: Fetch vendor libs
 on:
   push:
-    paths: ['vendor/*.url']
+    paths: ['vendor/*.url', 'vendor/jsm.list']
 permissions:
   contents: write
 jobs:
@@ -19,6 +19,16 @@ jobs:
               echo "downloaded $name"
             fi
           done
+          if [ -f vendor/jsm.list ]; then
+            while read -r rel; do
+              [ -z "$rel" ] && continue
+              if [ ! -f "vendor/jsm/$rel" ]; then
+                mkdir -p "vendor/jsm/$(dirname "$rel")"
+                curl -sSL --fail -o "vendor/jsm/$rel" "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/$rel"
+                echo "downloaded jsm/$rel"
+              fi
+            done < vendor/jsm.list
+          fi
       - name: Commit
         run: |
           git config user.name "eyla-bot"
