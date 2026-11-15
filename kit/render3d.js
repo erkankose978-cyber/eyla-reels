@@ -6,7 +6,7 @@ const fs = require('fs');
   const mode = process.argv[2];
   const browser = await chromium.launch({args:['--use-angle=swiftshader','--enable-unsafe-swiftshader','--ignore-gpu-blocklist']});
   const page = await browser.newPage({ viewport: { width: 1080, height: 1920 } });
-  await page.goto('http://127.0.0.1:8765/kit/' + (process.argv[4] || 'anim.html'));
+  await page.goto('http://127.0.0.1:8765/kit/' + (process.argv[4] || 'anim.html'), {waitUntil:'commit',timeout:0});
   page.on('console',m=>console.log('PAGE',m.text()));page.on('pageerror',e=>console.log('ERR',e.message));await page.waitForFunction(() => window.ready===true,null,{timeout:180000});
   const grab = async (t, q) => {
     const d = await page.evaluate(([t, q]) => { window.draw(t); return document.getElementById('c').toDataURL(q ? 'image/jpeg' : 'image/png', 0.95); }, [t, q]);

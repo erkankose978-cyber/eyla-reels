@@ -7,15 +7,31 @@
 @font-face{font-family:L;src:url(fonts/Lora-Italic-Variable.ttf);font-style:italic;font-weight:400 700}
 html,body{margin:0;background:#000}canvas#c{display:block}
 </style>
-<script type="importmap">{"imports":{"three":"../vendor/three.module.min.js","three/addons/":"../vendor/"}}</script>
+<script type="importmap">{"imports":{"three":"../vendor/three.module.min.js","three/addons/":"../vendor/jsm/"}}</script>
 </head><body><canvas id="c" width="1080" height="1920"></canvas>
 <script type="module">
 import * as THREE from 'three';
-import { RoundedBoxGeometry } from 'three/addons/RoundedBoxGeometry.js';
-const W=1080,H=1920;
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+import { Reflector } from 'three/addons/objects/Reflector.js';
+import { RectAreaLightUniformsLib } from 'three/addons/lights/RectAreaLightUniformsLib.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { GTAOPass } from 'three/addons/postprocessing/GTAOPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+RectAreaLightUniformsLib.init();
+window.Reflector=Reflector;
+window.makeComposer=(scene,cam,{ao=true,bloom=.22}={})=>{const c=new EffectComposer(R);c.setSize(W,H);c.setPixelRatio(1);
+ c.addPass(new RenderPass(scene,cam));
+ if(ao){const g=new GTAOPass(scene,cam,W,H);g.output=GTAOPass.OUTPUT.Default;g.blendIntensity=1;
+   g.updateGtaoMaterial({radius:.45,distanceExponent:1.4,thickness:1,scale:1,samples:16,distanceFallOff:1});
+   g.updatePdMaterial({lumaPhi:10,depthPhi:2,normalPhi:3,radius:6,rings:2,samples:16});c.addPass(g);}
+ if(bloom)c.addPass(new UnrealBloomPass(new THREE.Vector2(W/2,H/2),bloom,.5,.92));
+ c.addPass(new OutputPass());return c;};
+const W=1296,H=2304;
 const R=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});
 R.setSize(W,H,false); R.setPixelRatio(1);
-R.toneMapping=THREE.ACESFilmicToneMapping; R.toneMappingExposure=1.0;
+R.toneMapping=THREE.ACESFilmicToneMapping; R.toneMappingExposure=.95;
 R.outputColorSpace=THREE.SRGBColorSpace;
 R.shadowMap.enabled=true; R.shadowMap.type=THREE.PCFSoftShadowMap;
 const C=document.getElementById('c'), X=C.getContext('2d');
@@ -36,11 +52,12 @@ function canvasTex(size,fn,rep=[1,1],srgb=true){
  t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(rep[0],rep[1]);
  if(srgb)t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=8;return t;}
 // marble: base + warped veins
-window.marbleTex=(base=[150,132,118],vein=[214,196,170],dark=[98,84,74],seed=0)=>canvasTex(1024,(u,v)=>{
- const w=fbm(u*3+seed,v*3,5)*4.0;
- const n=Math.abs(Math.sin((u*2.2+v*3.1)*6+w*3.2));
- const n2=Math.abs(Math.sin((u*-3.5+v*1.4)*5+fbm(u*5,v*5+seed,4)*5));
- const ve=Math.pow(1-clamp(n),26)*.9+Math.pow(1-clamp(n2),40)*.6;
+window.marbleTex=(base=[132,112,98],vein=[196,178,156],dark=[96,80,70],seed=0)=>canvasTex(2048,(u,v)=>{
+ const w=fbm(u*2.5+seed,v*2.5,6)*3.0;
+ const n=Math.abs(Math.sin((u*1.6+v*2.4)*5+w*2.6));
+ const n2=Math.abs(Math.sin((u*-2.8+v*1.1)*4+fbm(u*4,v*4+seed,5)*4));
+ const n3=Math.abs(Math.sin((u*5+v*6)*3+fbm(u*9,v*9,4)*6));
+ const ve=Math.pow(1-clamp(n),90)*.85+Math.pow(1-clamp(n2),160)*.55+Math.pow(1-clamp(n3),220)*.35+Math.pow(1-clamp(n),12)*.12;
  const cl=fbm(u*8,v*8+seed,4);
  let c=base.map((b,i)=>lerp(b,dark[i],clamp((cl-.45)*1.6)));
  c=c.map((b,i)=>lerp(b,vein[i],clamp(ve)));return c;});
@@ -54,9 +71,9 @@ window.flutedTex=()=>canvasTex(512,(u,v)=>{const r=.55+.45*Math.cos(u*Math.PI*2*
 // ---------- environment (reflections: room + window) ----------
 function makeEnv(){
  const s=new THREE.Scene();
- const wall=new THREE.MeshBasicMaterial({color:0x8a7c70,side:THREE.BackSide});
+ const wall=new THREE.MeshBasicMaterial({color:0x3d342d,side:THREE.BackSide});
  s.add(new THREE.Mesh(new THREE.BoxGeometry(12,4,12),wall));
- const win=new THREE.MeshBasicMaterial({color:0xffffff});win.color.multiplyScalar(6);
+ const win=new THREE.MeshBasicMaterial({color:0xffffff});win.color.multiplyScalar(9);
  const mull=new THREE.MeshBasicMaterial({color:0x40362e});
  // window on the +z side (behind camera) and right
  for(let i=0;i<3;i++){const p=new THREE.Mesh(new THREE.PlaneGeometry(1.4,2.4),win);p.position.set(-2+i*1.55,.4,5.9);p.rotation.y=Math.PI;s.add(p);}

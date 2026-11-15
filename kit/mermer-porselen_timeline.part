@@ -1,0 +1,169 @@
+// ---------- #MalzemeDüellosu · Mermer mi, porselen mi? (photo-based, cue-driven, 21 phrases) ----------
+const CU=window.CUES, S=i=>CU[i].s, E=i=>CU[i].e;
+const OUT=window.OUTRO, END=window.END;
+const SERIES='#MalzemeDüellosu';
+const TXT=["Mutfak tezgâhında en çok sorulan soru:","mermer mi, porselen mi?","Uzaktan aynı görünüyorlar ama hiç aynı değiller.","Mermer doğal taş;","her plaka eşsiz,","damarlar kenardan bile devam ediyor.","Çizilirse yeniden cilalanabiliyor.","Ama gözenekli:","şarap leke bırakıyor,","limon yüzeyi matlaştırıyor.","Yılda bir-iki kez emprenye ister.","Porselen ise neredeyse hiç su çekmez;","leke tutmaz,","asitten etkilenmez,","sıcak tencereyi bile doğrudan koyabilirsiniz.","Zayıf noktası kenarları:","darbeyle kırılabilir ve tamiri zordur.","Doğallık istiyorsanız mermer,","rahatlık istiyorsanız porselen.","Siz hangisini seçerdiniz?","Yorumlara yazın."];
+const GROUPS=[[0,1],[2],[3,4],[5],[6],[7,8],[9],[10],[11],[12,13],[14],[15],[16],[17],[18]];
+const WT=TXT.map((s,i)=>{ const ws=s.split(' '); const tot=ws.reduce((a,w)=>a+w.length+1,0); let acc=0; return ws.map(w=>{ const t0=S(i)+(E(i)-S(i))*acc/tot; acc+=w.length+1; return [w,t0]; }); });
+
+// ---------- photos ----------
+const PH=['01_mermer_ada','02_porselen_ada','03_mermer_kenar','04_mermer_leke','05_mermer_bakim','06_porselen_silme','07_porselen_tencere','08_porselen_kirik'];
+const base=window.ready; window.ready=false;
+Promise.all([base,...PH.map(k=>loadImg(k,'../assets/mermer-porselen/'+k+'.png'))]).then(()=>{ window.ready=true; });
+
+// draw photo full-bleed with Ken Burns. fx,fy = focus (0..1) to drift towards
+function photo(k,t,t0,t1,{z0=1.0,z1=1.09,fx=.5,fy=.5}={}){
+  const im=imgs[k]; const p=eIO(prog(t,t0,t1+.6)); const z=lerp(z0,z1,p);
+  const sc=Math.max(W/im.width,H/im.height)*z, w=im.width*sc, h=im.height*sc;
+  const x=lerp(W/2-w/2, clamp(W/2-w*fx, W-w, 0), p*.6), y=lerp(H/2-h/2, clamp(H/2-h*fy, H-h, 0), p*.6);
+  g.drawImage(im,x,y,w,h); }
+function shadeTopBottom(top=.62,bot=.78){
+  let gr=g.createLinearGradient(0,0,0,720); gr.addColorStop(0,`rgba(14,11,9,${top})`); gr.addColorStop(1,'rgba(14,11,9,0)'); g.fillStyle=gr; g.fillRect(0,0,W,720);
+  gr=g.createLinearGradient(0,1300,0,H); gr.addColorStop(0,'rgba(14,11,9,0)'); gr.addColorStop(1,`rgba(14,11,9,${bot})`); g.fillStyle=gr; g.fillRect(0,1300,W,620); }
+function seriesTag(a=1){
+  g.save(); g.globalAlpha*=a; const lw=96, lh=lw*imgs.logoW.height/imgs.logoW.width; g.drawImage(imgs.logoW,W/2-lw/2,58,lw,lh);
+  g.font='600 20px P'; g.fillStyle=D.gold2; g.textAlign='center'; g.textBaseline='middle'; g.letterSpacing='6px';
+  g.fillText(SERIES.toUpperCase().replace('İ','I'),W/2+3,58+lh+26); g.letterSpacing='0px'; g.restore(); }
+
+// pros/cons card: side = 'MERMER'|'PORSELEN', kind '+'|'-', items [[text,t]]
+function card(t,t0,t1,side,kind,items,y=330){
+  const a=win(t,t0,t1,.3,.25); if(a<=0) return;
+  const good=kind==='+', col=good?D.good:D.bad;
+  const n=items.filter(([,ti])=>t>=ti-.05).length; const rowH=92, hTarget=150+Math.max(1,n)*rowH;
+  g.save(); g.globalAlpha*=a; const sl=(1-eOut(prog(t,t0,t0+.45)))*-60;
+  g.translate(sl,0);
+  glass(80,y,920,hTarget,34,good?'rgba(139,203,147,.55)':'rgba(240,122,95,.55)');
+  g.font='700 30px P'; g.letterSpacing='8px'; g.fillStyle=D.gold2; g.textAlign='left'; g.textBaseline='middle'; g.fillText(side,130,y+62); const sw=g.measureText(side).width; g.letterSpacing='0px';
+  g.font='italic 600 40px L'; g.fillStyle=col; g.fillText(good?'avantajları':'dezavantajları',130+sw+22,y+60);
+  g.fillStyle='rgba(244,237,228,.16)'; g.fillRect(130,y+108,820,2);
+  items.forEach(([txt,ti],i)=>{ const p=prog(t,ti-.05,ti+.35); if(p<=0) return; const e=eOut(p), yy=y+165+i*rowH;
+    g.save(); g.globalAlpha*=e; g.translate((1-e)*40,0);
+    const r=24*eBack(clamp(p*1.2)); g.fillStyle=col; g.beginPath(); g.arc(158,yy,Math.max(0,r),0,7); g.fill();
+    g.strokeStyle=D.ink; g.lineWidth=6; g.lineCap='round'; g.lineJoin='round'; g.beginPath();
+    if(good){ g.moveTo(147,yy+1); g.lineTo(155,yy+9); g.lineTo(170,yy-8); } else { g.moveTo(149,yy-9); g.lineTo(167,yy+9); g.moveTo(167,yy-9); g.lineTo(149,yy+9); } g.stroke();
+    g.font='600 44px P'; g.fillStyle=D.cream; g.fillText(txt,206,yy+2); g.restore(); });
+  g.restore(); }
+// pulsing ring highlight on a photo spot
+function ring(t,t0,t1,x,y,r,col){ const a=win(t,t0,t1,.25,.25); if(a<=0) return; const p=eOut(prog(t,t0,t0+.5));
+  g.save(); g.globalAlpha*=a; g.strokeStyle=col; g.lineWidth=6; g.setLineDash([]); g.beginPath(); g.arc(x,y,r*(.6+.4*p),-Math.PI/2,-Math.PI/2+Math.PI*2*p); g.stroke();
+  const q=(t*1.4)%1; g.globalAlpha*=(1-q)*.7; g.lineWidth=3; g.beginPath(); g.arc(x,y,r*(1+q*.35),0,7); g.stroke(); g.restore(); }
+
+function captions(t){
+  GROUPS.forEach((gr,gi)=>{
+    const t0=S(gr[0])-.08, t1= gi<GROUPS.length-1 ? S(GROUPS[gi+1][0])-.08 : S(19)-.1;
+    const a=win(t,t0,t1,.15,.12); if(a<=0) return;
+    const words=[].concat(...gr.map(i=>WT[i])); const nextT=k=> k+1<words.length? words[k+1][1] : E(gr[gr.length-1])+.2;
+    g.save(); g.globalAlpha=a; g.font='600 48px P'; g.textBaseline='middle';
+    const sp=15, ws=words.map(w=>g.measureText(w[0]).width); const lines=[[]]; let lw=0;
+    words.forEach((w,i)=>{ if(lw+ws[i]>900 && lines[lines.length-1].length){ lines.push([]); lw=0; } lines[lines.length-1].push(i); lw+=ws[i]+sp; });
+    const y0=1700-(lines.length-1)*38;
+    lines.forEach((ln,li)=>{ const tot=ln.reduce((s,i)=>s+ws[i],0)+sp*(ln.length-1); let x=W/2-tot/2; const y=y0+li*76;
+      ln.forEach(i=>{ const on=t>=words[i][1], cur=on && t<nextT(i);
+        g.shadowColor='rgba(0,0,0,.6)'; g.shadowBlur=14;
+        if(cur){ g.fillStyle=D.gold; rr(x-10,y-34,ws[i]+20,68,15); g.fill(); }
+        g.shadowBlur=cur?0:14; g.fillStyle= cur? D.ink : (on? D.cream : 'rgba(244,237,228,.45)'); g.textAlign='left'; g.fillText(words[i][0],x,y); x+=ws[i]+sp; }); });
+    g.restore(); });
+}
+
+// split view (mermer | porselen) with draggable-looking divider
+function split(t,div,labels){
+  photo(PH[0],t,0,OUT,{z0:1.02,z1:1.08});
+  g.save(); g.beginPath(); g.rect(div,0,W-div,H); g.clip(); photo(PH[1],t,0,OUT,{z0:1.02,z1:1.08}); g.restore();
+  shadeTopBottom(.7,.8);
+  // divider + handle
+  g.save(); g.fillStyle='rgba(255,250,240,.92)'; g.shadowColor='rgba(0,0,0,.5)'; g.shadowBlur=18; g.fillRect(div-2,0,4,H);
+  g.beginPath(); g.arc(div,1020,40,0,7); g.fill(); g.shadowBlur=0; g.fillStyle=D.ink; g.font='700 30px P'; g.textAlign='center'; g.textBaseline='middle'; g.fillText('‹ ›',div,1018); g.restore();
+  if(labels){ const [la,lb,ta,tb]=labels; const aa=eOut(prog(t,ta,ta+.4)), bb=eOut(prog(t,tb,tb+.4));
+    g.save(); g.textAlign='center'; g.textBaseline='middle';
+    if(aa>0){ g.globalAlpha=aa; tagPill(div/2,1240-(1-aa)*30,la[0],la[1]); }
+    if(bb>0){ g.globalAlpha=bb; tagPill(div+(W-div)/2,1240-(1-bb)*30,lb[0],lb[1]); }
+    g.restore(); }
+}
+function tagPill(x,y,top,big){
+  g.save(); g.font='700 46px P'; g.letterSpacing='4px'; const w=Math.max(g.measureText(big).width, 200)+70; g.letterSpacing='0px';
+  glass(x-w/2,y-70,w,140,30); g.textAlign='center'; g.textBaseline='middle';
+  if(top){ g.font='italic 600 34px L'; g.fillStyle=D.gold2; g.fillText(top,x,y-26); }
+  g.font='700 46px P'; g.letterSpacing='4px'; g.fillStyle=D.cream; g.fillText(big,x+2,top?y+26:y); g.letterSpacing='0px'; g.restore(); }
+
+function hook(t){
+  const p=eIO(prog(t,S(1)-.15,S(1)+.65)); const sway=Math.sin((t-S(1))*1.6)*28*prog(t,S(1)+.7,S(1)+1.5);
+  const div=lerp(W+4,W/2,p)+sway;
+  split(t,div,[[null,'MERMER'],[null,'PORSELEN'],S(1),S(1)+.35]);
+  headline(t,.15,[[['Mermer','i'],['mi,','n']],[['porselen','i'],['mi?','n']]],330,96,.12);
+  const q=eOut(prog(t,S(2),S(2)+.5)); if(q>0){ g.save(); g.globalAlpha=q*win(t,S(2),S(3),.1,.25); g.font='italic 500 42px L'; g.fillStyle=D.cream; g.textAlign='center';
+    g.fillText('Aynı görünüyor… ama aynı değil.',W/2,640+(1-q)*20); g.restore(); }
+}
+function ending(t){
+  const div=W/2+Math.sin(t*1.3)*18;
+  split(t,div,[['doğallık','MERMER'],['rahatlık','PORSELEN'],S(17),S(18)]);
+  // CTA
+  const c=eBack(prog(t,S(19),S(19)+.55)); if(c>0){ g.save(); g.globalAlpha=clamp(c);
+    g.translate(W/2,520); g.scale(c,c); glass(-400,-150,800,300,40,'rgba(217,181,127,.7)');
+    g.textAlign='center'; g.textBaseline='middle'; g.font='700 64px P'; g.fillStyle=D.cream; g.fillText('Siz hangisini',0,-58);
+    g.font='italic 600 74px L'; g.fillStyle=D.gold2; g.fillText('seçerdiniz?',0,22);
+    const y=eOut(prog(t,S(20),S(20)+.35)); g.globalAlpha=clamp(c)*y; g.font='700 36px P'; g.fillStyle=D.good; g.fillText('💬  Yorumlara yazın',0,104); g.restore(); }
+}
+
+function scenes(t){
+  const X=[S(3)-.12,S(7)-.12,S(10)-.12,S(11)-.12,S(14)-.12,S(15)-.12,S(17)-.12];
+  // crossfade helper
+  const layer=(t0,t1,fn)=>{ const a=win(t,t0,t1,.32,.001); if(a<=0) return; g.save(); g.globalAlpha=a; fn(); g.restore(); };
+  if(t<X[0]+.4) hook(t);
+  layer(X[0],X[1]+.4,()=>{ photo(PH[2],t,X[0],X[1],{z0:1.12,z1:1.0,fx:.45,fy:.45}); shadeTopBottom(.55,.8); });
+  layer(X[1],X[2]+.4,()=>{ photo(PH[3],t,X[1],X[2],{z0:1.0,z1:1.03,fx:.5,fy:.5}); shadeTopBottom(.55,.8);
+    ring(t,S(8),X[2],372,1335,215,D.bad); ring(t,S(9),X[2],855,1125,170,D.bad); });
+  layer(X[2],X[3]+.4,()=>{ photo(PH[4],t,X[2],X[3],{z0:1.04,z1:1.12,fx:.6,fy:.5}); shadeTopBottom(.55,.8); });
+  layer(X[3],X[4]+.4,()=>{ photo(PH[5],t,X[3],X[4],{z0:1.1,z1:1.0,fx:.45,fy:.6}); shadeTopBottom(.55,.8); });
+  layer(X[4],X[5]+.4,()=>{ photo(PH[6],t,X[4],X[5],{z0:1.0,z1:1.1,fx:.6,fy:.5}); shadeTopBottom(.55,.8); });
+  layer(X[5],X[6]+.4,()=>{ photo(PH[7],t,X[5],X[6],{z0:1.0,z1:1.18,fx:.6,fy:.62}); shadeTopBottom(.55,.8);
+    ring(t,S(15)+.2,X[6],563,1198,95,D.bad); });
+  layer(X[6],OUT+1,()=>ending(t));
+  // cards
+  card(t,X[0],X[1],'MERMER','+',[['Doğal taş',S(3)],['Her plaka eşsiz',S(4)],['Desen kenarda da devam eder',S(5)],['Yeniden cilalanabilir',S(6)]]);
+  card(t,X[1],X[3],'MERMER','-',[['Gözenekli',S(7)],['Şarap leke bırakır',S(8)],['Asit (limon) matlaştırır',S(9)],['Yılda 1–2 kez emprenye',S(10)]]);
+  card(t,X[3],X[5],'PORSELEN','+',[['Neredeyse hiç su çekmez',S(11)],['Leke tutmaz',S(12)],['Asitten etkilenmez',S(13)],['Isıya dayanıklı',S(14)]]);
+  card(t,X[5],X[6],'PORSELEN','-',[['Kenarı darbeye hassas',S(15)+.3],['Tamiri zor',S(16)+.6]]);
+  seriesTag(t<X[0]?eOut(prog(t,0,.5)):1);
+}
+
+// ---------- OUTRO ----------
+function outro(t){
+  const p=prog(t,OUT,OUT+.8); if(p<=0) return;
+  const k=eIO(p);
+  g.save();
+  // iris wipe: two halves slide in from sides (marble left / porcelain right), blurred + darkened
+  const bgA=k; g.globalAlpha=bgA; g.filter='blur(14px) brightness(.32) saturate(.9)';
+  const z=1.15+.06*prog(t,OUT,END);
+  const dr=(im,cx)=>{ const sc=Math.max(W/im.width,H/im.height)*z; const w=im.width*sc,h=im.height*sc; g.drawImage(im,cx-w/2,H/2-h/2,w,h); };
+  g.save(); g.beginPath(); g.rect(0,0,W/2,H); g.clip(); dr(imgs[PH[0]],W/2-(1-k)*200); g.restore();
+  g.save(); g.beginPath(); g.rect(W/2,0,W/2,H); g.clip(); dr(imgs[PH[1]],W/2+(1-k)*200); g.restore();
+  g.filter='none'; g.globalAlpha=1;
+  const vg=g.createRadialGradient(W/2,880,120,W/2,960,1150); vg.addColorStop(0,'rgba(30,24,19,.15)'); vg.addColorStop(1,'rgba(10,8,6,.85)'); g.fillStyle=vg; g.globalAlpha=k; g.fillRect(0,0,W,H); g.globalAlpha=1;
+  // gold seam (the duel line) grows from centre, then splits into the frame ring
+  const s1=eIO(prog(t,OUT+.3,OUT+1.0)); if(s1>0){ g.fillStyle=D.gold; g.globalAlpha=.9*(1-prog(t,OUT+1.3,OUT+1.9)); g.fillRect(W/2-1.5,960-960*s1,3,1920*s1); g.globalAlpha=1; }
+  // logo with light sweep
+  const lp=eOut(prog(t,OUT+.9,OUT+1.7)); if(lp>0){ const L=imgs.logoW, h=lerp(300,330,lp), w=L.width/L.height*h;
+    const oc=outro.oc||(outro.oc=document.createElement('canvas')); oc.width=W; oc.height=H; const o=oc.getContext('2d');
+    o.clearRect(0,0,W,H); o.drawImage(L,W/2-w/2,800-h/2,w,h);
+    const sw=prog(t,OUT+1.5,OUT+2.5); if(sw>0&&sw<1){ o.globalCompositeOperation='source-atop'; const sx=lerp(-300,W+300,eIO(sw));
+      const gr=o.createLinearGradient(sx-140,0,sx+140,0); gr.addColorStop(0,'rgba(255,230,180,0)'); gr.addColorStop(.5,'rgba(255,236,196,.95)'); gr.addColorStop(1,'rgba(255,230,180,0)');
+      o.fillStyle=gr; o.fillRect(0,0,W,H); o.globalCompositeOperation='source-over'; }
+    g.globalAlpha=lp; g.filter=`blur(${(1-lp)*8}px)`; g.drawImage(oc,0,(1-lp)*30); g.filter='none'; g.globalAlpha=1; }
+  g.textAlign='center'; g.textBaseline='middle';
+  const t1=eOut(prog(t,OUT+1.4,OUT+2.0)); if(t1>0){ g.globalAlpha=t1; g.font='300 40px P'; g.fillStyle=D.cream; g.letterSpacing='16px'; g.fillText('İÇ MİMARLIK',W/2+8,1110+(1-t1)*20); g.letterSpacing='0px'; }
+  const t2=eOut(prog(t,OUT+1.8,OUT+2.4)); if(t2>0){ g.globalAlpha=t2;
+    const ln=eIO(t2); g.fillStyle=D.gold; g.fillRect(W/2-170*ln,1180,340*ln,2);
+    g.font='700 62px P'; g.fillStyle=D.gold2; g.fillText(SERIES,W/2,1262+(1-t2)*24);
+    g.font='italic 500 38px L'; g.fillStyle='rgba(244,237,228,.85)'; g.fillText('İki malzeme, tek karar.',W/2,1336+(1-t2)*24); }
+  const t4=eOut(prog(t,OUT+2.4,OUT+2.9)); if(t4>0){ g.globalAlpha=t4*.75; g.font='500 28px P'; g.fillStyle=D.cream; g.letterSpacing='3px';
+    g.fillText('TAKİP ET  ·  KAYDET  ·  PAYLAŞ',W/2+2,1500); g.letterSpacing='0px'; }
+  g.globalAlpha=eIn(prog(t,END-.35,END)); g.fillStyle='#000'; g.fillRect(0,0,W,H);
+  g.restore(); }
+
+window.draw=function(t){
+  g.setTransform(1,0,0,1,0,0); g.globalAlpha=1; g.fillStyle=D.ink; g.fillRect(0,0,W,H);
+  if(t<OUT+.9){ scenes(t); captions(t); }
+  outro(t);
+  post(t);
+};
+</script></body></html>
