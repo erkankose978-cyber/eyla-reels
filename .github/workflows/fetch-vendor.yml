@@ -1,0 +1,27 @@
+name: Fetch vendor libs
+on:
+  push:
+    paths: ['vendor/*.url']
+permissions:
+  contents: write
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download vendor files
+        run: |
+          set -e
+          for f in vendor/*.url; do
+            name=$(basename "$f" .url)
+            if [ ! -f "vendor/$name" ]; then
+              curl -sSL --fail -o "vendor/$name" "$(head -n1 "$f")"
+              echo "downloaded $name"
+            fi
+          done
+      - name: Commit
+        run: |
+          git config user.name "eyla-bot"
+          git config user.email "eyla-bot@users.noreply.github.com"
+          git add vendor/ || true
+          git diff --cached --quiet || (git commit -m "vendor: fetched" && git push)
