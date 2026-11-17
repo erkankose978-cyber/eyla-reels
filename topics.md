@@ -17,7 +17,7 @@
       Lavabo üst kenarı yerden 85–90 cm · çanak ~15 cm → çanak altı dolap 70–75 cm · batarya ağzı çanağın kenarından 10–15 cm yukarıda. Kanca: "Çanak lavabo aldınız, şimdi neden her yere su sıçrıyor?"
 - [x] gizli-isik — Tavandaki gizli ışık nasıl çalışır? | Hasan (2026-11-16, media 17919795705517499)
       LED şerit asma tavandaki ışık cebinin (kanal) içine gizlenir, ışık tavana vurup yansıyarak dağılır · ışık cebi açıklığı 10–15 cm, iç yüksekliği 8–10 cm · LED, cebin önündeki perde/dudak (5–8 cm) arkasında kalmalı, gözle görünmemeli · LED duvardan/tavandan 5–10 cm uzakta, alüminyum profil + difüzörle noktalanma (nokta nokta görünme) olmaz · sıcak ton 2700–3000 K, 10–14 W/m. Kanca: "Tavandan gelen o yumuşak ışığın sırrı lambada değil, 10 santimlik bir boşlukta."
-- [ ] sarkit — Yemek masası üstü sarkıt kaç cm'e asılır? | Hasan
+- [x] sarkit — Yemek masası üstü sarkıt kaç cm'e asılır? | Hasan (2026-11-17, media 17928703005441260)
       Avizenin alt ucu masadan 75–85 cm yukarıda · avize çapı masa eninin ½–⅔'ü (90 cm masa → 45–60 cm) · uzun masada 2–3 sarkıt, aralarında 60–75 cm. Kanca: "Masada karşınızdakini görmek için avizenin altından mı bakıyorsunuz?"
 - [ ] merdiven — Merdiven basamak formülü | Piko
       2 × rıht + 1 basamak = 60–64 cm (ideal 63) · konutta rıht 16–18 cm, basamak 26–30 cm (17 + 29 = 63) · merdiven genişliği en az 90–100 cm · basamak üstü kafa yüksekliği en az 210 cm. Kanca: "Merdiven çıkarken neden yoruluyorsunuz? Suç basamakta."
