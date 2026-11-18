@@ -1,0 +1,105 @@
+// ===== front elevation: wall, door, baseboard =====
+const FL=1440, K=2.9; const zy=v=>FL-v*K; const WX0=100, WX1=980;
+function kf(t,KK){ let v=KK[0][1]; for(let i=0;i<KK.length;i++){ const [t0,val,d]=KK[i]; if(t>=t0){ const p=eIO(prog(t,t0,t0+(d||.7))); const prev=i>0?KK[i-1][1]:val; v=lerp(prev,val,p); } } return v; }
+function state(t){
+  const H=kf(t,[[0,265],[S(1)+.1,250,.6],[S(5),250],[S(6),275,.9],[S(7),310,.9],[S(9),275,.8]]);
+  const b=kf(t,[[0,3],[S(1)+.1,22,.6],[S(3),10,.6],[S(5),8,.6],[S(6),10,.6],[S(7),12,.5],[at(8,.3),15,.6],[S(9),10,.7]]);
+  const paint=eIO(prog(t,at(11,.25),at(11,.6)));
+  return {H,b,paint};
+}
+const WALL='#E6DDD1';
+function room(t,st){
+  const top=zy(st.H);
+  g.save(); g.shadowColor='rgba(0,0,0,.5)'; g.shadowBlur=50; g.shadowOffsetY=18;
+  const gr=g.createLinearGradient(0,top,0,FL); gr.addColorStop(0,'#EFE8DE'); gr.addColorStop(1,WALL); g.fillStyle=gr; g.fillRect(WX0,top,WX1-WX0,FL-top); g.restore();
+  // ceiling slab + cornice line
+  g.fillStyle='#F8F4EE'; g.fillRect(WX0-20,top-16,WX1-WX0+40,16); g.fillStyle='rgba(0,0,0,.08)'; g.fillRect(WX0,top,WX1-WX0,5);
+  // floor
+  const fg=g.createLinearGradient(0,FL,0,FL+40); fg.addColorStop(0,'#B8977A'); fg.addColorStop(1,'#8E7158'); g.fillStyle=fg; g.fillRect(WX0-30,FL,WX1-WX0+60,34);
+  // door (90 x 210) with casing 7 cm
+  const dx0=160, dw=90*K, dh=210*K, cw=7*K;
+  g.fillStyle='#F7F3EC'; g.fillRect(dx0-cw,zy(210)-cw,dw+2*cw,dh+cw);
+  g.fillStyle='#C9B49B'; g.fillRect(dx0,zy(210),dw,dh);
+  g.strokeStyle='rgba(0,0,0,.12)'; g.lineWidth=2; g.strokeRect(dx0+18,zy(210)+18,dw-36,dh*0.42); g.strokeRect(dx0+18,zy(210)+dh*0.5,dw-36,dh*0.46);
+  g.fillStyle='#8E7B66'; g.beginPath(); g.arc(dx0+dw-26,zy(100),7,0,7); g.fill();
+  // baseboard
+  const bh=st.b*K; const white='#FBF9F5';
+  const col= st.paint>0 ? mix(white,WALL,st.paint) : white;
+  for(const [x0,x1] of [[WX0,dx0-cw],[dx0+dw+cw,WX1]]){
+    const sh=g.createLinearGradient(0,FL-bh-14,0,FL-bh); sh.addColorStop(0,'rgba(60,45,30,0)'); sh.addColorStop(1,'rgba(60,45,30,.35)'); g.fillStyle=sh; g.fillRect(x0,FL-bh-14,x1-x0,14);
+    g.fillStyle=col; g.fillRect(x0,FL-bh,x1-x0,bh);
+    g.fillStyle='rgba(0,0,0,.45)'; g.fillRect(x0,FL-bh,x1-x0,3); g.fillStyle='rgba(255,255,255,.7)'; g.fillRect(x0,FL-bh+3,x1-x0,2);
+    g.fillStyle='rgba(0,0,0,.06)'; g.fillRect(x0,FL-3,x1-x0,3); }
+  // sofa silhouette for scale
+  const sx=620, sw=300; g.fillStyle='#A9A096'; rr(sx,zy(85),sw,85*K-4,18); g.fill(); g.fillStyle='#958C82'; rr(sx,zy(45),sw,45*K-4,12); g.fill();
+  g.fillStyle='#6E5F52'; g.fillRect(sx+16,FL-14,10,14); g.fillRect(sx+sw-26,FL-14,10,14);
+  return {top,dx0,dw,cw};
+}
+function mix(a,b,p){ const pa=parseInt(a.slice(1),16), pb=parseInt(b.slice(1),16); const r=Math.round(lerp(pa>>16,pb>>16,p)), gg=Math.round(lerp((pa>>8)&255,(pb>>8)&255,p)), bb=Math.round(lerp(pa&255,pb&255,p)); return `rgb(${r},${gg},${bb})`; }
+function zoomBubble(t,st,a){ // magnified baseboard
+  if(a<=0) return; g.save(); g.globalAlpha*=a; const cx=820, cy=1180, R=120;
+  g.save(); g.beginPath(); g.arc(cx,cy,R,0,7); g.clip(); g.fillStyle=WALL; g.fillRect(cx-R,cy-R,2*R,2*R);
+  const s=7, fl=cy+70; const bh=st.b*s; g.fillStyle='#8E7158'; g.fillRect(cx-R,fl,2*R,R);
+  g.fillStyle='#FBF9F5'; g.fillRect(cx-R,fl-bh,2*R,bh); g.fillStyle='rgba(0,0,0,.12)'; g.fillRect(cx-R,fl-bh,2*R,4);
+  g.restore(); g.strokeStyle=D.gold; g.lineWidth=4; g.beginPath(); g.arc(cx,cy,R,0,7); g.stroke();
+  chip(cx,cy-R-30,Math.round(st.b)+' cm',D.gold,1,1,30); g.restore(); }
+function pervazInset(t,a){
+  if(a<=0) return; g.save(); g.globalAlpha*=a; const p=eBack(prog(t,S(9),S(9)+.5)); g.translate(540,1010); g.scale(p,p);
+  glass(-400,-250,800,470,30); g.font='600 26px P'; g.fillStyle=D.muted; g.textAlign='center'; g.fillText('Üstten kesit',0,-208);
+  // two cases: bad (left) / good (right). wall along top, casing protrudes
+  const cases=[[-195,'✕',D.bad,2.2,1.4],[195,'✓',D.good,1.2,2.2]]; // [x, mark, col, baseboard depth, casing depth]
+  cases.forEach(([x,m,c,bd,cd],i)=>{ const s=62, wy=-140; const show= i===0 ? 1 : eOut(prog(t,at(10,.3),at(10,.6)));
+    g.save(); g.globalAlpha*=show; g.translate(x,0);
+    g.fillStyle='#CFC4B4'; g.fillRect(-160,wy-30,320,30); // wall
+    g.fillStyle='#F7F3EC'; g.fillRect(-160,wy,130,cd*s); g.strokeStyle='rgba(0,0,0,.25)'; g.lineWidth=2; g.strokeRect(-160,wy,130,cd*s); // casing
+    g.fillStyle='#FBF9F5'; g.fillRect(-30,wy,190,bd*s); g.strokeRect(-30,wy,190,bd*s); // baseboard
+    g.font='600 22px P'; g.fillStyle=D.cream; g.textAlign='center'; g.fillText('pervaz',-95,wy+cd*s+34); g.fillText('süpürgelik',65,wy+bd*s+34);
+    if(i===0){ const pu=.5+.5*Math.sin(t*8); g.strokeStyle=D.bad; g.lineWidth=5; g.globalAlpha*=.5+.5*pu; g.beginPath(); g.arc(-30,wy+cd*s+ (bd-cd)*s/2,34,0,7); g.stroke(); g.globalAlpha/= (.5+.5*pu); }
+    g.restore(); chip(540+x*p,1010+150*p,i===0?'Süpürgelik kalın':'Temiz birleşim',c,show,1,24,m); });
+  g.restore(); }
+function sizeCard(t){
+  const a=win(t,S(5)-.1,S(9),.35,.3); if(a<=0) return; g.save(); g.globalAlpha=a;
+  const y0=1480; glass(80,y0,920,150,30);
+  const rows=[['250 cm','8 cm',S(5)],['270–280 cm','10 cm',S(6)],['300+ cm','12–15 cm',S(7)]];
+  rows.forEach(([h,b,ts],i)=>{ const x=120+i*300; const p=eOut(prog(t,ts,ts+.4)); const on=t>=ts;
+    g.save(); g.globalAlpha*=.35+.65*p; g.font='500 24px P'; g.fillStyle=D.muted; g.textAlign='left'; g.textBaseline='middle'; g.fillText('Tavan '+h,x,y0+48);
+    g.font='italic 600 44px L'; g.fillStyle= on? D.gold2 : D.cream; g.fillText(b,x,y0+102); g.restore(); });
+  g.restore(); }
+function scene(t){
+  const A=win(t,0,S(12)+.1,.5,.35); if(A<=0) return; const st=state(t);
+  g.save(); g.globalAlpha=A; const r=room(t,st);
+  // ceiling height dim
+  const dA=win(t,S(5)-.1,S(9)+.4,.3,.3);
+  if(dA>0) dim(WX1+40,r.top,WX1+40,FL,null,D.gold,dA);
+  g.restore();
+  if(dA>0) chip(WX1-70,r.top+50,Math.round(st.H/5)*5+' cm',D.gold,A*dA,1,26);
+  // hook chips
+  chip(540,FL-60,'Çizgi gibi kayboluyor',D.bad,win(t,.6,S(1),.3,.25),eBack(prog(t,.6,1)),26,'✕');
+  chip(540,FL-120,'Oda basık görünüyor',D.bad,win(t,at(2,.2),S(3),.3,.25),eBack(prog(t,at(2,.2),at(2,.2)+.4)),26,'✕');
+  zoomBubble(t,st,A*win(t,S(5)-.1,S(9)+.1,.35,.3));
+  // paint tip
+  const pA=win(t,at(11,.5),S(12),.3,.3);
+  if(pA>0){ chip(540,FL-80,'Duvar rengi süpürgelik',D.good,pA,eBack(prog(t,at(11,.5),at(11,.5)+.4)),26,'✓');
+    g.save(); g.globalAlpha=pA*A; g.strokeStyle=D.good; g.fillStyle=D.good; g.lineWidth=6; g.lineCap='round'; const yy=state(t).H; const y0=zy(st.H)+40+Math.sin(t*5)*8;
+    g.beginPath(); g.moveTo(WX1-60,y0+120); g.lineTo(WX1-60,y0); g.moveTo(WX1-80,y0+22); g.lineTo(WX1-60,y0); g.lineTo(WX1-40,y0+22); g.stroke(); g.restore(); }
+}
+const HEADS=[
+  [S(0)-.05,S(3),[[['Süpürgelik','n']],[['kaç','i'],['cm','i'],['olmalı?','n']]]],
+  [S(3),S(5),[[['Tavan','n'],['yüksekliğine','n']],[['göre','n'],['seçilir','i']]]],
+  [S(5),S(6),[[['250','n'],['cm','n'],['tavan','n']],[['8','i'],['cm','i'],['süpürgelik','n']]]],
+  [S(6),S(7),[[['270–280','n'],['cm','n'],['tavan','n']],[['10','i'],['cm','i']]]],
+  [S(7),S(9),[[['3','n'],['m','n'],['ve','n'],['üstü','n']],[['12–15','i'],['cm','i']]]],
+  [S(9),S(11),[[['Pervazdan','n']],[['biraz','n'],['ince','i']]]],
+  [S(11),S(12),[[['Duvar','n'],['rengi','n']],[['tavanı','n'],['yükseltir','i']]]],
+];
+window.draw=function(t){
+  g.setTransform(1,0,0,1,0,0); g.globalAlpha=1; g.filter='none';
+  bg(t); topBar();
+  HEADS.forEach(([a,b,lines])=>{ const h=win(t,a,b,.01,.3); if(h>0){ g.save(); g.globalAlpha=h; headline(t,a,lines,300,74); g.restore(); } });
+  scene(t); sizeCard(t); pervazInset(t,win(t,S(9),S(11)+.1,.35,.3)); cta(t);
+  captions(t);
+  for(const tt of [S(3),S(5),S(9),S(11),S(12)]){ const p=prog(t,tt-.25,tt+.35); if(p>0&&p<1){ const x=lerp(-400,W+400,eIO(p)); const sw=g.createLinearGradient(x-260,0,x+260,0); sw.addColorStop(0,'rgba(255,230,190,0)'); sw.addColorStop(.5,'rgba(255,230,190,.16)'); sw.addColorStop(1,'rgba(255,230,190,0)'); g.fillStyle=sw; g.fillRect(0,0,W,H); } }
+  outro(t);
+  post(t);
+};
+</script></body></html>
