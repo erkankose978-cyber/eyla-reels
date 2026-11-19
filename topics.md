@@ -20,7 +20,7 @@
 - [x] sarkit — Yemek masası üstü sarkıt kaç cm'e asılır? | Hasan (2026-11-17, media 17928703005441260)
       Avizenin alt ucu masadan 75–85 cm yukarıda · avize çapı masa eninin ½–⅔'ü (90 cm masa → 45–60 cm) · uzun masada 2–3 sarkıt, aralarında 60–75 cm. Kanca: "Masada karşınızdakini görmek için avizenin altından mı bakıyorsunuz?"
 - [x] supurgelik — Süpürgelik yüksekliği kaç cm olmalı? | Hasan (2026-11-18, ek paylaşım, media 18119636791810743)
-- [ ] merdiven — Merdiven basamak formülü | Piko
+- [x] merdiven — Merdiven basamak formülü | Piko (2026-11-19, media 18417650158094149)
       2 × rıht + 1 basamak = 60–64 cm (ideal 63) · konutta rıht 16–18 cm, basamak 26–30 cm (17 + 29 = 63) · merdiven genişliği en az 90–100 cm · basamak üstü kafa yüksekliği en az 210 cm. Kanca: "Merdiven çıkarken neden yoruluyorsunuz? Suç basamakta."
 - [ ] koridor — Koridor ve geçiş genişlikleri | Hasan
       Ev içi koridor en az 90 cm, rahat 100–120 cm · mobilya arası ana geçiş 75–90 cm · yatak kenarı 60 cm · tekerlekli sandalye için 120 cm. Kanca: "Koridorda iki kişi yan yana geçemiyorsa ölçü yanlış."
