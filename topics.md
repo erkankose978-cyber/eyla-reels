@@ -22,7 +22,7 @@
 - [x] supurgelik — Süpürgelik yüksekliği kaç cm olmalı? | Hasan (2026-11-18, ek paylaşım, media 18119636791810743)
 - [x] merdiven — Merdiven basamak formülü | Piko (2026-11-19, media 18417650158094149)
       2 × rıht + 1 basamak = 60–64 cm (ideal 63) · konutta rıht 16–18 cm, basamak 26–30 cm (17 + 29 = 63) · merdiven genişliği en az 90–100 cm · basamak üstü kafa yüksekliği en az 210 cm. Kanca: "Merdiven çıkarken neden yoruluyorsunuz? Suç basamakta."
-- [ ] koridor — Koridor ve geçiş genişlikleri | Hasan
+- [x] koridor — Koridor ve geçiş genişlikleri | Hasan (2026-11-20, media 18110058767205633)
       Ev içi koridor en az 90 cm, rahat 100–120 cm · mobilya arası ana geçiş 75–90 cm · yatak kenarı 60 cm · tekerlekli sandalye için 120 cm. Kanca: "Koridorda iki kişi yan yana geçemiyorsa ölçü yanlış."
 - [ ] dus — Duş alanı kaç cm olmalı? | Piko
       Duş alanı en az 80 × 80 cm, rahat 90 × 90 veya 90 × 120 cm · duş başlığı yerden ~200–210 cm · batarya yerden 100–110 cm · cam panel yüksekliği ~200 cm. Kanca: "Duşta dirseğiniz camlara çarpıyorsa duşakabin küçük."
