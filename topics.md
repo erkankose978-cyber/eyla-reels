@@ -24,7 +24,7 @@
       2 × rıht + 1 basamak = 60–64 cm (ideal 63) · konutta rıht 16–18 cm, basamak 26–30 cm (17 + 29 = 63) · merdiven genişliği en az 90–100 cm · basamak üstü kafa yüksekliği en az 210 cm. Kanca: "Merdiven çıkarken neden yoruluyorsunuz? Suç basamakta."
 - [x] koridor — Koridor ve geçiş genişlikleri | Hasan (2026-11-20, media 18110058767205633)
       Ev içi koridor en az 90 cm, rahat 100–120 cm · mobilya arası ana geçiş 75–90 cm · yatak kenarı 60 cm · tekerlekli sandalye için 120 cm. Kanca: "Koridorda iki kişi yan yana geçemiyorsa ölçü yanlış."
-- [ ] dus — Duş alanı kaç cm olmalı? | Piko
+- [x] dus — Duş alanı kaç cm olmalı? | Piko (2026-11-21, media 18138179209672913)
       Duş alanı en az 80 × 80 cm, rahat 90 × 90 veya 90 × 120 cm · duş başlığı yerden ~200–210 cm · batarya yerden 100–110 cm · cam panel yüksekliği ~200 cm. Kanca: "Duşta dirseğiniz camlara çarpıyorsa duşakabin küçük."
 - [ ] calisma-masasi — Çalışma masası ve monitör yüksekliği | Piko
       Masa yüksekliği 72–75 cm · masa derinliği en az 60, ideal 70–80 cm · monitörün üst kenarı göz hizasında ya da biraz altında · ekrana mesafe 50–70 cm (bir kol boyu). Kanca: "Akşam boynunuz mu ağrıyor? Monitör yanlış yükseklikte."
