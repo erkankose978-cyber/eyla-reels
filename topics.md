@@ -26,7 +26,7 @@
       Ev içi koridor en az 90 cm, rahat 100–120 cm · mobilya arası ana geçiş 75–90 cm · yatak kenarı 60 cm · tekerlekli sandalye için 120 cm. Kanca: "Koridorda iki kişi yan yana geçemiyorsa ölçü yanlış."
 - [x] dus — Duş alanı kaç cm olmalı? | Piko (2026-11-21, media 18138179209672913)
       Duş alanı en az 80 × 80 cm, rahat 90 × 90 veya 90 × 120 cm · duş başlığı yerden ~200–210 cm · batarya yerden 100–110 cm · cam panel yüksekliği ~200 cm. Kanca: "Duşta dirseğiniz camlara çarpıyorsa duşakabin küçük."
-- [ ] calisma-masasi — Çalışma masası ve monitör yüksekliği | Piko
+- [x] calisma-masasi — Çalışma masası ve monitör yüksekliği | Piko (2026-11-22, media 18166098736497614)
       Masa yüksekliği 72–75 cm · masa derinliği en az 60, ideal 70–80 cm · monitörün üst kenarı göz hizasında ya da biraz altında · ekrana mesafe 50–70 cm (bir kol boyu). Kanca: "Akşam boynunuz mu ağrıyor? Monitör yanlış yükseklikte."
 - [ ] spot-araligi — Spot aralığı nasıl hesaplanır? | Hasan
       Spotlar arası mesafe ≈ tavan yüksekliğinin yarısı (260 cm tavan → ~120–130 cm) · duvardan uzaklık 40–60 cm (duvarı yalayan ışık için 30–40) · dolap önlerinde dolap kapağından 30–40 cm ileri. Kanca: "Tavan spot dolu ama oda hâlâ karanlık mı?"
