@@ -1,0 +1,137 @@
+// ---------- Çalışma masası ve monitör yüksekliği (cue-driven, 13 phrases) ----------
+const CU=window.CUES, S=i=>CU[i].s, E=i=>CU[i].e, at=(i,f)=>S(i)+(E(i)-S(i))*f;
+const OUT=window.OUTRO, END=window.END;
+const TXT=["Akşam olunca boynunuz mu ağrıyor?", "Suç sandalyede değil,", "monitör yanlış yükseklikte.", "Kural şu:", "çalışma masası yerden yetmiş iki ile yetmiş beş santim yüksekliğinde olmalı.", "Masa derinliği en az altmış,", "ideali yetmiş ile seksen santim.", "Monitörün üst kenarı göz hizanızda ya da biraz altında dursun.", "Bonus:", "ekranla aranızda elli ile yetmiş santim,", "yani bir kol boyu mesafe bırakın.", "Sizin masanız kaç santim?", "Yorumlara yazın."];
+const GROUPS=[[0],[1,2],[3],[4],[5],[6],[7],[8,9],[10]];
+const WT=TXT.map((s,i)=>{ const ws=s.split(' '); const tot=ws.reduce((a,w)=>a+w.length+1,0); let acc=0; return ws.map(w=>{ const t0=S(i)+(E(i)-S(i))*acc/tot; acc+=w.length+1; return [w,t0]; }); });
+function captions(t){
+  GROUPS.forEach((gr,gi)=>{
+    const t0=S(gr[0])-.08, t1= gi<GROUPS.length-1 ? S(GROUPS[gi+1][0])-.08 : S(11)-.1;
+    const a=win(t,t0,t1,.15,.12); if(a<=0) return;
+    const words=[].concat(...gr.map(i=>WT[i])); const nextT=k=> k+1<words.length? words[k+1][1] : E(gr[gr.length-1])+.2;
+    g.save(); g.globalAlpha=a; g.font='600 48px P'; g.textBaseline='middle';
+    const sp=15, ws=words.map(w=>g.measureText(w[0]).width); const lines=[[]]; let lw=0;
+    words.forEach((w,i)=>{ if(lw+ws[i]>900 && lines[lines.length-1].length){ lines.push([]); lw=0; } lines[lines.length-1].push(i); lw+=ws[i]+sp; });
+    const y0=1720-(lines.length-1)*38;
+    lines.forEach((ln,li)=>{ const tot=ln.reduce((s,i)=>s+ws[i],0)+sp*(ln.length-1); let x=W/2-tot/2; const y=y0+li*76;
+      ln.forEach(i=>{ const on=t>=words[i][1], cur=on && t<nextT(i);
+        if(cur){ g.fillStyle=D.gold; rr(x-10,y-34,ws[i]+20,68,15); g.fill(); }
+        g.fillStyle= cur? D.ink : (on? D.cream : 'rgba(244,237,228,.35)'); g.textAlign='left'; g.fillText(words[i][0],x,y); x+=ws[i]+sp; }); });
+    g.restore(); });
+}
+function dim(x1,y1,x2,y2,label,col,a,offx=0,offy=0){
+  if(a<=0) return; g.save(); g.globalAlpha*=a; g.strokeStyle=col; g.lineWidth=3.5; g.lineCap='round';
+  const p=eOut(clamp(a*1.2)); const mx=(x1+x2)/2, my=(y1+y2)/2; const hx=(x2-x1)/2*p, hy=(y2-y1)/2*p;
+  g.beginPath(); g.moveTo(mx-hx,my-hy); g.lineTo(mx+hx,my+hy); g.stroke();
+  const vx=y2-y1, vy=-(x2-x1), L=Math.hypot(vx,vy)||1, ux=vx/L*13, uy=vy/L*13;
+  for(const [x,y] of [[mx-hx,my-hy],[mx+hx,my+hy]]){ g.beginPath(); g.moveTo(x-ux,y-uy); g.lineTo(x+ux,y+uy); g.stroke(); }
+  g.restore(); if(label) chip(mx+offx,my+offy,label,col,a,1,25);
+}
+function cta(t){
+  const a=win(t,S(11)-.1,OUT+.1,.35,.3); if(a<=0) return; g.save(); g.globalAlpha=a;
+  const bp=eBack(prog(t,S(11),S(11)+.5)); g.save(); g.translate(540,640); g.scale(bp,bp); g.rotate(Math.sin(t*3)*.04);
+  glass(-110,-85,220,150,40,'rgba(217,181,127,.7)'); g.fillStyle='rgba(30,25,20,.86)'; g.beginPath(); g.moveTo(-30,63); g.lineTo(-62,112); g.lineTo(10,63); g.fill();
+  g.fillStyle=D.gold; for(let k=-1;k<=1;k++){ g.beginPath(); g.arc(k*50,-10,13+3*Math.max(0,Math.sin(t*6-k)),0,7); g.fill(); } g.restore();
+  headline(t,S(11),[[['Masanız','n']],[['kaç','i'],['santim?','i']]],920,80,.07);
+  g.save(); g.globalAlpha*=eOut(prog(t,S(11)+.6,S(11)+1)); g.font='italic 600 46px L'; g.fillStyle=D.gold2; g.textAlign='center'; g.fillText('___ cm',540,1110); g.restore();
+  const yA=eOut(prog(t,S(12),S(12)+.4)); if(yA>0){ g.save(); g.globalAlpha*=yA; g.font='700 50px P'; g.fillStyle=D.good; g.textAlign='center'; g.fillText('Yorumlara yazın',540,1280);
+    g.strokeStyle=D.good; g.lineWidth=7; g.lineCap='round'; const yy=1320+Math.sin(t*6)*8; g.beginPath(); g.moveTo(540,yy); g.lineTo(540,yy+60); g.moveTo(515,yy+35); g.lineTo(540,yy+62); g.lineTo(565,yy+35); g.stroke(); g.restore(); }
+  g.restore(); }
+function outro(t){
+  const p=prog(t,OUT,OUT+.7); if(p<=0) return;
+  const R=eIO(p)*Math.hypot(W,H);
+  g.save(); g.beginPath(); g.arc(W/2,960,R,0,7); g.clip();
+  const gr=g.createRadialGradient(W/2,900,50,W/2,960,1300); gr.addColorStop(0,'#3A302A'); gr.addColorStop(1,'#120F0C'); g.fillStyle=gr; g.fillRect(0,0,W,H);
+  const lp_=eOut(prog(t,OUT+.45,OUT+1.3)); const L=imgs.logoW, h=lerp(380,420,lp_), w=L.width/L.height*h;
+  g.globalAlpha=lp_; g.drawImage(L,W/2-w/2,800-h/2+(1-lp_)*40,w,h);
+  const ln=eIO(prog(t,OUT+1.0,OUT+1.7)); g.globalAlpha=1; g.strokeStyle=D.gold; g.lineWidth=3; g.beginPath(); g.moveTo(W/2-140*ln,1060); g.lineTo(W/2+140*ln,1060); g.stroke();
+  const t1=eOut(prog(t,OUT+1.2,OUT+1.8)); g.globalAlpha=t1; g.font='300 46px P'; g.fillStyle=D.cream; g.textAlign='center'; g.textBaseline='middle';
+  g.letterSpacing='14px'; g.fillText('İÇ MİMARLIK',W/2+7,1130+(1-t1)*20); g.letterSpacing='0px';
+  const t2=eOut(prog(t,OUT+1.6,OUT+2.2)); g.globalAlpha=t2; g.font='700 40px P'; g.fillStyle=D.gold; g.fillText('#SantimiSantimine',W/2,1250+(1-t2)*20);
+  g.font='italic 500 36px L'; g.fillStyle='rgba(244,237,228,.8)'; g.fillText('Her gün bir iç mimarlık kuralı',W/2,1320+(1-t2)*20);
+  const t3=eOut(prog(t,OUT+2.0,OUT+2.6)); g.globalAlpha=t3*.5; g.font='400 23px P'; g.fillStyle=D.cream;
+  g.fillText('Ölçüler genel öneridir; yönetmeliğe ve projeye göre değişebilir.',W/2,1640);
+  g.globalAlpha=eIn(prog(t,END-.35,END)); g.fillStyle='#000'; g.fillRect(0,0,W,H);
+  g.restore(); }
+// ===== desk scene (side elevation) =====
+const FL=1340, K=6, zy=cm=>FL-cm*K, DX0=450, MONX=725;
+function floorBg(y0,y1){ g.save(); g.shadowColor='rgba(0,0,0,.5)'; g.shadowBlur=50; g.shadowOffsetY=18;
+  const gr=g.createLinearGradient(0,y0,0,y1); gr.addColorStop(0,'#EAE0D2'); gr.addColorStop(1,'#DCCFBE'); g.fillStyle=gr; rr(70,y0,940,y1-y0,26); g.fill(); g.restore(); }
+function depthCm(t){ let d=50; d=lerp(d,60,eIO(prog(t,S(5),S(5)+.8))); d=lerp(d,75,eIO(prog(t,S(6),S(6)+.8))); return d; }
+function hunch(t){ return 1-eIO(prog(t,S(7)+.2,S(7)+1.1)); }
+function reach(t){ return eIO(prog(t,S(10),S(10)+.7))*(1-eIO(prog(t,S(11)-.4,S(11)))); }
+function deskScene(t){
+  floorBg(470,1380);
+  // wall line + floor
+  g.fillStyle='#3A302A'; g.fillRect(90,FL,900,22);
+  const dep=depthCm(t), DX1=DX0+dep*K, top=zy(73);
+  // desk
+  g.fillStyle='#8B6A4E'; rr(DX0,top,DX1-DX0,22,6); g.fill();
+  g.fillStyle='#6E5440'; g.fillRect(DX0+18,top+22,16,FL-top-22); g.fillRect(DX1-34,top+22,16,FL-top-22);
+  // monitor
+  const h=hunch(t);
+  const mTop=lerp(zy(97),zy(119),eIO(prog(t,S(7)+.2,S(7)+1.1))), mBot=lerp(top-6,zy(87),eIO(prog(t,S(7)+.2,S(7)+1.1)));
+  g.fillStyle='#4A4A4A'; rr(MONX+6,mBot,10,top-mBot,3); g.fill(); rr(MONX-30,top-8,80,8,3); g.fill();
+  g.fillStyle='#2A2A2A'; rr(MONX-4,mTop,18,mBot-mTop,5); g.fill();
+  g.fillStyle='rgba(150,205,225,.9)'; g.fillRect(MONX-6,mTop+6,4,mBot-mTop-12);
+  // chair
+  g.fillStyle='#5A4A3E'; rr(200,zy(46),180,20,8); g.fill(); rr(200,zy(110),22,zy(46)-zy(110),8); g.fill();
+  g.fillRect(282,zy(46)+20,14,FL-zy(46)-40); g.fillRect(220,FL-22,140,10);
+  // person
+  const sk='#C58B6A', cl='rgba(58,48,42,.92)';
+  const hip=[300,zy(50)], sh=[315+28*h,zy(100)+20*h];
+  const head=[sh[0]+22+48*h, zy(115)+40*h];
+  g.lineCap='round'; g.lineJoin='round';
+  g.strokeStyle=cl; g.lineWidth=52; g.beginPath(); g.moveTo(hip[0]+10,hip[1]); g.lineTo(440,zy(50)); g.stroke();
+  g.lineWidth=36; g.beginPath(); g.moveTo(440,zy(50)); g.lineTo(450,FL-24); g.stroke();
+  g.lineWidth=70; g.beginPath(); g.moveTo(hip[0],hip[1]); g.quadraticCurveTo(hip[0]-10+20*h,(hip[1]+sh[1])/2,sh[0],sh[1]); g.stroke();
+  g.strokeStyle=sk; g.lineWidth=26; g.beginPath(); g.moveTo(sh[0],sh[1]); g.lineTo(head[0]-8,head[1]+20); g.stroke();
+  g.fillStyle=sk; g.beginPath(); g.arc(head[0],head[1],38,0,7); g.fill();
+  g.fillStyle='#4A372C'; g.beginPath(); g.arc(head[0]-8,head[1]-8,38,Math.PI*.95,Math.PI*1.9); g.fill();
+  const eye=[head[0]+22,head[1]-6]; g.fillStyle=D.ink; g.beginPath(); g.arc(eye[0],eye[1],5,0,7); g.fill();
+  // arm
+  const r=reach(t); const hand=[lerp(DX0+70,sh[0]+360,r), lerp(top-8,sh[1],r)], elb=[lerp(sh[0]+20,(sh[0]+hand[0])/2,r), lerp(top+20,sh[1]+4,r)];
+  g.strokeStyle=cl; g.lineWidth=30; g.beginPath(); g.moveTo(sh[0],sh[1]); g.lineTo(elb[0],elb[1]); g.lineTo(hand[0],hand[1]); g.stroke();
+  g.fillStyle=sk; g.beginPath(); g.arc(hand[0],hand[1],15,0,7); g.fill();
+  // bad flash on neck
+  const fl=win(t,.6,S(3),.15,.3)*(.5+.5*Math.sin(t*10)); if(fl>0){ g.save(); g.globalAlpha*=fl; g.strokeStyle=D.bad; g.lineWidth=6; g.beginPath(); g.arc((sh[0]+head[0])/2,(sh[1]+head[1])/2+10,52,0,7); g.stroke(); g.restore(); }
+  // sight line
+  const sa=win(t,.6,S(8)+.1,.3,.3); if(sa>0){ g.save(); g.globalAlpha*=sa; g.setLineDash([14,12]); g.lineDashOffset=-t*40; g.strokeStyle= h>.5? D.bad : D.good; g.lineWidth=4; g.beginPath(); g.moveTo(eye[0]+6,eye[1]); g.lineTo(MONX-6,mTop+(mBot-mTop)*.15); g.stroke(); g.restore(); }
+  // dims
+  dim(960,FL,960,top,'72–75 cm',D.gold,win(t,at(4,.3),S(5)+.1,.35,.25),-40,0);
+  dim(DX0,top+90,DX1,top+90,`${Math.round(dep)} cm`,D.gold,win(t,S(5)+.1,S(7),.35,.25),0,0);
+  dim(eye[0],zy(132),MONX,zy(132),'50–70 cm',D.gold,win(t,at(9,.2),S(11),.35,.25),0,-48);
+}
+function scene(t){
+  const A=win(t,0,S(11)+.1,.4,.35); if(A<=0) return; g.save(); g.globalAlpha=A;
+  const z=1+.025*prog(t,0,S(11)); g.translate(540,925); g.scale(z,z); g.translate(-540,-925);
+  deskScene(t);
+  g.restore();
+  chip(780,1250,'Boyun eğik',D.bad,win(t,1.0,S(3)+.2,.3,.25),eBack(prog(t,1.0,1.4)),30,'✕');
+  chip(780,1250,'Boyun düz',D.good,win(t,S(7)+1.1,S(8)+.2,.3,.3),eBack(prog(t,S(7)+1.1,S(7)+1.5)),30,'✓');
+  chip(780,1250,'Bir kol boyu',D.good,win(t,S(10)+.6,S(11),.3,.3),eBack(prog(t,S(10)+.6,S(10)+1)),30,'✓');
+}
+function card(t){
+  const rows=[[S(3),S(5),'Masa yüksekliği','yerden 72–75 cm'],[S(5),S(7),'Masa derinliği','en az 60 · ideal 70–80 cm'],[S(7),S(8),'Monitör üst kenarı','göz hizası ya da biraz altı'],[S(8),S(11)+.1,'Ekran mesafesi','50–70 cm · bir kol boyu']];
+  rows.forEach(([a,b,k,v])=>{ const al=win(t,a-.05,b,.3,.3); if(al<=0) return; g.save(); g.globalAlpha=al;
+    glass(80,1440,920,150,30); g.font='500 32px P'; g.fillStyle=D.muted; g.textAlign='center'; g.textBaseline='middle'; g.fillText(k,540,1482);
+    g.font='italic 700 52px L'; g.fillStyle=D.gold2; g.fillText(v,540,1545); g.restore(); });
+}
+const HEADS=[
+  [S(0)-.05,S(3),[[['Boynunuz','n']],[['mu','n'],['ağrıyor?','i']]]],
+  [S(3),S(5),[[['Masa','n'],['yüksekliği','n']],[['72–75','i'],['cm','i']]]],
+  [S(5),S(7),[[['Masa','n'],['derinliği','n']],[['ideal','n'],['70–80','i'],['cm','i']]]],
+  [S(7),S(8),[[['Monitör','n'],['üst','n'],['kenarı','n']],[['göz','i'],['hizasında','i']]]],
+  [S(8),S(11),[[['Ekran','n'],['mesafesi','n']],[['50–70','i'],['cm','i']]]],
+];
+window.draw=function(t){
+  g.setTransform(1,0,0,1,0,0); g.globalAlpha=1; g.filter='none';
+  bg(t); topBar();
+  HEADS.forEach(([a,b,lines])=>{ const h=win(t,a,b,.01,.3); if(h>0){ g.save(); g.globalAlpha=h; headline(t,a,lines,300,74); g.restore(); } });
+  scene(t); card(t); cta(t);
+  captions(t);
+  for(const tt of [S(3),S(5),S(7),S(8),S(11)]){ const p=prog(t,tt-.25,tt+.35); if(p>0&&p<1){ const x=lerp(-400,W+400,eIO(p)); const sw=g.createLinearGradient(x-260,0,x+260,0); sw.addColorStop(0,'rgba(255,230,190,0)'); sw.addColorStop(.5,'rgba(255,230,190,.16)'); sw.addColorStop(1,'rgba(255,230,190,0)'); g.fillStyle=sw; g.fillRect(0,0,W,H); } }
+  outro(t);
+  post(t);
+};
+</script></body></html>
