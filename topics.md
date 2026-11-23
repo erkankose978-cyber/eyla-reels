@@ -28,5 +28,5 @@
       Duş alanı en az 80 × 80 cm, rahat 90 × 90 veya 90 × 120 cm · duş başlığı yerden ~200–210 cm · batarya yerden 100–110 cm · cam panel yüksekliği ~200 cm. Kanca: "Duşta dirseğiniz camlara çarpıyorsa duşakabin küçük."
 - [x] calisma-masasi — Çalışma masası ve monitör yüksekliği | Piko (2026-11-22, media 18166098736497614)
       Masa yüksekliği 72–75 cm · masa derinliği en az 60, ideal 70–80 cm · monitörün üst kenarı göz hizasında ya da biraz altında · ekrana mesafe 50–70 cm (bir kol boyu). Kanca: "Akşam boynunuz mu ağrıyor? Monitör yanlış yükseklikte."
-- [ ] spot-araligi — Spot aralığı nasıl hesaplanır? | Hasan
+- [x] spot-araligi — Spot aralığı nasıl hesaplanır? | Hasan (2026-11-23, media 18129962065867076)
       Spotlar arası mesafe ≈ tavan yüksekliğinin yarısı (260 cm tavan → ~120–130 cm) · duvardan uzaklık 40–60 cm (duvarı yalayan ışık için 30–40) · dolap önlerinde dolap kapağından 30–40 cm ileri. Kanca: "Tavan spot dolu ama oda hâlâ karanlık mı?"
