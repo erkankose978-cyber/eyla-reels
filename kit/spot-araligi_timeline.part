@@ -1,0 +1,142 @@
+// ---------- Spot aralığı nasıl hesaplanır? (cue-driven, 13 phrases) ----------
+const CU=window.CUES, S=i=>CU[i].s, E=i=>CU[i].e, at=(i,f)=>S(i)+(E(i)-S(i))*f;
+const OUT=window.OUTRO, END=window.END;
+const TXT=["Tavan spot dolu ama oda hâlâ karanlık mı?", "Sorun spot sayısında değil,", "aralarındaki mesafede.", "Kural şu:", "iki spot arası, tavan yüksekliğinin yarısı kadar olmalı.", "260 santim tavanda,", "spotlar arası 120 ile 130 santim.", "Duvardan uzaklık 40 ile 60 santim;", "duvarı ışıkla yalamak istiyorsanız 30 ile 40.", "Bonus:", "dolap önündeki spotu, dolap kapağından 30 ile 40 santim ileri koyun.", "Sizin spotlarınız arası kaç santim?", "Yorumlara yazın."];
+const GROUPS=[[0],[1,2],[3,4],[5,6],[7],[8],[9,10]];
+const WT=TXT.map((s,i)=>{ const ws=s.split(' '); const tot=ws.reduce((a,w)=>a+w.length+1,0); let acc=0; return ws.map(w=>{ const t0=S(i)+(E(i)-S(i))*acc/tot; acc+=w.length+1; return [w,t0]; }); });
+function captions(t){
+  GROUPS.forEach((gr,gi)=>{
+    const t0=S(gr[0])-.08, t1= gi<GROUPS.length-1 ? S(GROUPS[gi+1][0])-.08 : S(11)-.1;
+    const a=win(t,t0,t1,.15,.12); if(a<=0) return;
+    const words=[].concat(...gr.map(i=>WT[i])); const nextT=k=> k+1<words.length? words[k+1][1] : E(gr[gr.length-1])+.2;
+    g.save(); g.globalAlpha=a; g.font='600 48px P'; g.textBaseline='middle';
+    const sp=15, ws=words.map(w=>g.measureText(w[0]).width); const lines=[[]]; let lw=0;
+    words.forEach((w,i)=>{ if(lw+ws[i]>900 && lines[lines.length-1].length){ lines.push([]); lw=0; } lines[lines.length-1].push(i); lw+=ws[i]+sp; });
+    const y0=1720-(lines.length-1)*38;
+    lines.forEach((ln,li)=>{ const tot=ln.reduce((s,i)=>s+ws[i],0)+sp*(ln.length-1); let x=W/2-tot/2; const y=y0+li*76;
+      ln.forEach(i=>{ const on=t>=words[i][1], cur=on && t<nextT(i);
+        if(cur){ g.fillStyle=D.gold; rr(x-10,y-34,ws[i]+20,68,15); g.fill(); }
+        g.fillStyle= cur? D.ink : (on? D.cream : 'rgba(244,237,228,.35)'); g.textAlign='left'; g.fillText(words[i][0],x,y); x+=ws[i]+sp; }); });
+    g.restore(); });
+}
+function dim(x1,y1,x2,y2,label,col,a,offx=0,offy=0){
+  if(a<=0) return; g.save(); g.globalAlpha*=a; g.strokeStyle=col; g.lineWidth=3.5; g.lineCap='round';
+  const p=eOut(clamp(a*1.2)); const mx=(x1+x2)/2, my=(y1+y2)/2; const hx=(x2-x1)/2*p, hy=(y2-y1)/2*p;
+  g.beginPath(); g.moveTo(mx-hx,my-hy); g.lineTo(mx+hx,my+hy); g.stroke();
+  const vx=y2-y1, vy=-(x2-x1), L=Math.hypot(vx,vy)||1, ux=vx/L*13, uy=vy/L*13;
+  for(const [x,y] of [[mx-hx,my-hy],[mx+hx,my+hy]]){ g.beginPath(); g.moveTo(x-ux,y-uy); g.lineTo(x+ux,y+uy); g.stroke(); }
+  g.restore(); if(label) chip(mx+offx,my+offy,label,col,a,1,25);
+}
+function cta(t){
+  const a=win(t,S(11)-.1,OUT+.1,.35,.3); if(a<=0) return; g.save(); g.globalAlpha=a;
+  const bp=eBack(prog(t,S(11),S(11)+.5)); g.save(); g.translate(540,640); g.scale(bp,bp); g.rotate(Math.sin(t*3)*.04);
+  glass(-110,-85,220,150,40,'rgba(217,181,127,.7)'); g.fillStyle='rgba(30,25,20,.86)'; g.beginPath(); g.moveTo(-30,63); g.lineTo(-62,112); g.lineTo(10,63); g.fill();
+  g.fillStyle=D.gold; for(let k=-1;k<=1;k++){ g.beginPath(); g.arc(k*50,-10,13+3*Math.max(0,Math.sin(t*6-k)),0,7); g.fill(); } g.restore();
+  headline(t,S(11),[[['Spotlarınız','n'],['arası','n']],[['kaç','i'],['santim?','i']]],920,80,.07);
+  g.save(); g.globalAlpha*=eOut(prog(t,S(11)+.6,S(11)+1)); g.font='italic 600 46px L'; g.fillStyle=D.gold2; g.textAlign='center'; g.fillText('___ cm',540,1110); g.restore();
+  const yA=eOut(prog(t,S(12),S(12)+.4)); if(yA>0){ g.save(); g.globalAlpha*=yA; g.font='700 50px P'; g.fillStyle=D.good; g.textAlign='center'; g.fillText('Yorumlara yazın',540,1280);
+    g.strokeStyle=D.good; g.lineWidth=7; g.lineCap='round'; const yy=1320+Math.sin(t*6)*8; g.beginPath(); g.moveTo(540,yy); g.lineTo(540,yy+60); g.moveTo(515,yy+35); g.lineTo(540,yy+62); g.lineTo(565,yy+35); g.stroke(); g.restore(); }
+  g.restore(); }
+function outro(t){
+  const p=prog(t,OUT,OUT+.7); if(p<=0) return;
+  const R=eIO(p)*Math.hypot(W,H);
+  g.save(); g.beginPath(); g.arc(W/2,960,R,0,7); g.clip();
+  const gr=g.createRadialGradient(W/2,900,50,W/2,960,1300); gr.addColorStop(0,'#3A302A'); gr.addColorStop(1,'#120F0C'); g.fillStyle=gr; g.fillRect(0,0,W,H);
+  const lp_=eOut(prog(t,OUT+.45,OUT+1.3)); const L=imgs.logoW, h=lerp(380,420,lp_), w=L.width/L.height*h;
+  g.globalAlpha=lp_; g.drawImage(L,W/2-w/2,800-h/2+(1-lp_)*40,w,h);
+  const ln=eIO(prog(t,OUT+1.0,OUT+1.7)); g.globalAlpha=1; g.strokeStyle=D.gold; g.lineWidth=3; g.beginPath(); g.moveTo(W/2-140*ln,1060); g.lineTo(W/2+140*ln,1060); g.stroke();
+  const t1=eOut(prog(t,OUT+1.2,OUT+1.8)); g.globalAlpha=t1; g.font='300 46px P'; g.fillStyle=D.cream; g.textAlign='center'; g.textBaseline='middle';
+  g.letterSpacing='14px'; g.fillText('İÇ MİMARLIK',W/2+7,1130+(1-t1)*20); g.letterSpacing='0px';
+  const t2=eOut(prog(t,OUT+1.6,OUT+2.2)); g.globalAlpha=t2; g.font='700 40px P'; g.fillStyle=D.gold; g.fillText('#SantimiSantimine',W/2,1250+(1-t2)*20);
+  g.font='italic 500 36px L'; g.fillStyle='rgba(244,237,228,.8)'; g.fillText('Her gün bir iç mimarlık kuralı',W/2,1320+(1-t2)*20);
+  const t3=eOut(prog(t,OUT+2.0,OUT+2.6)); g.globalAlpha=t3*.5; g.font='400 23px P'; g.fillStyle=D.cream;
+  g.fillText('Ölçüler genel öneridir; yönetmeliğe ve projeye göre değişebilir.',W/2,1640);
+  g.globalAlpha=eIn(prog(t,END-.35,END)); g.fillStyle='#000'; g.fillRect(0,0,W,H);
+  g.restore(); }
+// ===== room section with ceiling spots =====
+const K=2.6, RX0=90, RX1=990, CY=560, FY=CY+260*K, RW=(RX1-RX0)/K; // RW ≈ 346 cm
+const cx=cm=>RX0+cm*K;
+const CAB=60; // dolap derinliği
+function spotsAt(t){
+  // phase A: bunched (hook) → B: rule (45,173,301) → C: wall wash (35,...) → D: cabinet (front 35 from door)
+  const bunched=[128,158,188,218], rule=[45,173,301,301];
+  let p=eIO(prog(t,S(4),S(4)+1.0));
+  let xs=bunched.map((b,i)=>lerp(b,rule[i],p));
+  const w=eIO(prog(t,S(8),S(8)+.8))*(1-eIO(prog(t,S(9),S(9)+.6))); xs[0]=lerp(xs[0],35,w);
+  const d=eIO(prog(t,S(10),S(10)+.9)); xs[2]=lerp(xs[2],RW-CAB-35,d); xs[1]=lerp(xs[1],(45+RW-CAB-35)/2,d);
+  const alpha=[1,1,1,1-p];
+  return xs.map((x,i)=>[x,alpha[i]]);
+}
+function lux(xcm,spots){ let s=0; for(const [sx,a] of spots){ const dx=(xcm-sx)/120; s+=a*Math.exp(-dx*dx*2.2); } return s; }
+function roomScene(t){
+  const spots=spotsAt(t), cab=eIO(prog(t,S(9),S(10)+.6));
+  // room box
+  g.save(); g.shadowColor='rgba(0,0,0,.55)'; g.shadowBlur=50; g.shadowOffsetY=18; g.fillStyle='#17130F'; rr(RX0-20,CY-60,RX1-RX0+40,FY-CY+100,26); g.fill(); g.restore();
+  // walls lit by wash
+  for(let x=RX0;x<RX1;x+=6){ const L=lux((x-RX0)/K,spots); const v=clamp(L*.85); g.fillStyle=`rgba(255,214,150,${(0.02+0.26*v).toFixed(3)})`; g.fillRect(x,CY,6,FY-CY); }
+  // wall wash on left wall
+  const wash=clamp(lux(0,spots)*1.1); const wg=g.createLinearGradient(RX0,0,RX0+90,0); wg.addColorStop(0,`rgba(255,220,160,${.75*wash})`); wg.addColorStop(1,'rgba(255,220,160,0)'); g.fillStyle=wg; g.fillRect(RX0,CY,90,FY-CY);
+  // cones
+  g.save(); g.globalCompositeOperation='lighter';
+  for(const [sx,a] of spots){ if(a<=0.01) continue; const x=cx(sx); const half=150*K;
+    const cg=g.createLinearGradient(0,CY,0,FY); cg.addColorStop(0,`rgba(255,225,170,${.26*a})`); cg.addColorStop(1,`rgba(255,225,170,${.03*a})`);
+    g.fillStyle=cg; g.beginPath(); g.moveTo(x-10,CY+8); g.lineTo(x+10,CY+8); g.lineTo(Math.min(RX1,x+half),FY); g.lineTo(Math.max(RX0,x-half),FY); g.closePath(); g.fill(); }
+  g.restore();
+  // cabinet (right)
+  if(cab>0){ g.save(); g.globalAlpha*=cab; const x0=cx(RW-CAB); g.fillStyle='#8B6A4E'; g.fillRect(x0,CY+(1-cab)*60,RX1-x0,FY-CY);
+    g.fillStyle='#A3825F'; g.fillRect(x0,CY+(1-cab)*60,10,FY-CY); g.strokeStyle='rgba(0,0,0,.25)'; g.lineWidth=3; for(let y=CY+200;y<FY;y+=220){ g.beginPath(); g.moveTo(x0+18,y); g.lineTo(RX1,y); g.stroke(); }
+    const doorL=clamp(lux(RW-CAB,spots)); g.fillStyle=`rgba(255,220,160,${.45*doorL})`; g.fillRect(x0,CY,26,FY-CY); g.restore(); }
+  // floor lux bar
+  for(let x=RX0;x<RX1;x+=4){ const v=clamp(lux((x-RX0)/K,spots)); g.fillStyle=`rgb(${Math.round(lerp(40,250,v))},${Math.round(lerp(34,214,v))},${Math.round(lerp(28,160,v))})`; g.fillRect(x,FY,4,22); }
+  // ceiling + floor slabs
+  g.fillStyle='#3A302A'; g.fillRect(RX0-20,CY-24,RX1-RX0+40,24); g.fillRect(RX0-20,FY+22,RX1-RX0+40,16);
+  // spots
+  for(const [sx,a] of spots){ if(a<=0.01) continue; g.save(); g.globalAlpha*=a; const x=cx(sx);
+    g.fillStyle='#E9E2D8'; rr(x-22,CY-4,44,12,4); g.fill(); g.fillStyle='#FFF4D6'; g.shadowColor='#FFD9A0'; g.shadowBlur=30; g.beginPath(); g.arc(x,CY+10,9,0,7); g.fill(); g.restore(); }
+  // dark corner flash (hook)
+  const fl=win(t,.6,S(4),.2,.3)*(.55+.45*Math.sin(t*8)); if(fl>0){ g.save(); g.globalAlpha*=fl; g.strokeStyle=D.bad; g.lineWidth=6; g.setLineDash([16,12]);
+    rr(RX0+14,FY-200,170,190,20); g.stroke(); rr(RX1-184,FY-200,170,190,20); g.stroke(); g.restore(); }
+  // dims
+  const sp=spots;
+  dim(RX0+40,CY,RX0+40,FY,'260 cm',D.gold,win(t,at(4,.35),S(7),.35,.25),78,0);
+  dim(cx(sp[0][0]),CY+120,cx(sp[1][0]),CY+120,'H ÷ 2',D.gold,win(t,at(4,.5),S(6),.35,.25),0,-46);
+  dim(cx(sp[0][0]),CY+120,cx(sp[1][0]),CY+120,'120–130 cm',D.gold,win(t,S(6),S(7),.35,.25),0,-46);
+  dim(cx(sp[1][0]),CY+120,cx(sp[2][0]),CY+120,'120–130 cm',D.gold,win(t,at(6,.3),S(7),.35,.25),0,-46);
+  dim(RX0,CY+140,cx(sp[0][0]),CY+140,'40–60 cm',D.gold,win(t,S(7),S(8)+.2,.35,.25),70,58);
+  dim(RX0,CY+140,cx(sp[0][0]),CY+140,'30–40 cm',D.gold2,win(t,S(8)+.3,S(9),.35,.25),70,58);
+  dim(cx(sp[2][0]),CY+140,cx(RW-CAB),CY+140,'30–40 cm',D.gold,win(t,S(10)+.8,S(11),.35,.25),-70,58);
+}
+function scene(t){
+  const A=win(t,0,S(11)+.1,.4,.35); if(A<=0) return; g.save(); g.globalAlpha=A;
+  const z=1+.025*prog(t,0,S(11)); g.translate(540,925); g.scale(z,z); g.translate(-540,-925);
+  roomScene(t);
+  g.restore();
+  chip(540,1330,'Köşeler karanlık',D.bad,win(t,1.0,S(4)+.2,.3,.25),eBack(prog(t,1.0,1.4)),30,'✕');
+  chip(540,1330,'Eşit, yumuşak ışık',D.good,win(t,at(6,.5),S(7)+.1,.3,.3),eBack(prog(t,at(6,.5),at(6,.5)+.4)),30,'✓');
+  chip(540,1330,'Duvar ışıkla yıkanır',D.good,win(t,at(8,.55),S(9)+.1,.3,.3),eBack(prog(t,at(8,.55),at(8,.55)+.4)),30,'✓');
+  chip(540,1330,'Kapak aydınlık, gölge yok',D.good,win(t,at(10,.6),S(11),.3,.3),eBack(prog(t,at(10,.6),at(10,.6)+.4)),30,'✓');
+}
+function card(t){
+  const rows=[[S(3),S(5),'Spot aralığı','tavan yüksekliği ÷ 2'],[S(5),S(7),'260 cm tavan','spot arası 120–130 cm'],[S(7),S(9),'Duvardan uzaklık','40–60 cm · wall-wash 30–40'],[S(9),S(11)+.1,'Dolap önü','kapaktan 30–40 cm ileri']];
+  rows.forEach(([a,b,k,v])=>{ const al=win(t,a-.05,b,.3,.3); if(al<=0) return; g.save(); g.globalAlpha=al;
+    glass(80,1440,920,150,30); g.font='500 32px P'; g.fillStyle=D.muted; g.textAlign='center'; g.textBaseline='middle'; g.fillText(k,540,1482);
+    g.font='italic 700 52px L'; g.fillStyle=D.gold2; g.fillText(v,540,1545); g.restore(); });
+}
+const HEADS=[
+  [S(0)-.05,S(3),[[['Spot','n'],['dolu,','n']],[['oda','i'],['karanlık?','i']]]],
+  [S(3),S(5),[[['Spot','n'],['arası','n']],[['tavan','i'],['÷','i'],['2','i']]]],
+  [S(5),S(7),[[['260','n'],['cm','n'],['tavan','n']],[['120–130','i'],['cm','i']]]],
+  [S(7),S(9),[[['Duvardan','n']],[['40–60','i'],['cm','i']]]],
+  [S(9),S(11),[[['Bonus:','n'],['dolap','n'],['önü','n']],[['30–40','i'],['cm','i']]]],
+];
+window.draw=function(t){
+  g.setTransform(1,0,0,1,0,0); g.globalAlpha=1; g.filter='none';
+  bg(t); topBar();
+  HEADS.forEach(([a,b,lines])=>{ const h=win(t,a,b,.01,.3); if(h>0){ g.save(); g.globalAlpha=h; headline(t,a,lines,300,74); g.restore(); } });
+  scene(t); card(t); cta(t);
+  captions(t);
+  for(const tt of [S(3),S(5),S(7),S(9),S(11)]){ const p=prog(t,tt-.25,tt+.35); if(p>0&&p<1){ const x=lerp(-400,W+400,eIO(p)); const sw=g.createLinearGradient(x-260,0,x+260,0); sw.addColorStop(0,'rgba(255,230,190,0)'); sw.addColorStop(.5,'rgba(255,230,190,.16)'); sw.addColorStop(1,'rgba(255,230,190,0)'); g.fillStyle=sw; g.fillRect(0,0,W,H); } }
+  outro(t);
+  post(t);
+};
+</script></body></html>
