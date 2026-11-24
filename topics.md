@@ -30,3 +30,31 @@
       Masa yüksekliği 72–75 cm · masa derinliği en az 60, ideal 70–80 cm · monitörün üst kenarı göz hizasında ya da biraz altında · ekrana mesafe 50–70 cm (bir kol boyu). Kanca: "Akşam boynunuz mu ağrıyor? Monitör yanlış yükseklikte."
 - [x] spot-araligi — Spot aralığı nasıl hesaplanır? | Hasan (2026-11-23, media 18129962065867076)
       Spotlar arası mesafe ≈ tavan yüksekliğinin yarısı (260 cm tavan → ~120–130 cm) · duvardan uzaklık 40–60 cm (duvarı yalayan ışık için 30–40) · dolap önlerinde dolap kapağından 30–40 cm ileri. Kanca: "Tavan spot dolu ama oda hâlâ karanlık mı?"
+- [ ] tv-mesafesi — TV kaç cm yükseğe ve kaç metre uzağa? | Hasan
+      Ekranın merkezi otururken göz hizasında, yerden ~100–110 cm · izleme mesafesi 4K'da ekran köşegeni × 1–1,5 (55" ≈ 140 cm → 1,4–2,1 m), HD'de × 1,5–2,5 · şömine üstü gibi yüksek montajda ekran aşağı eğilmeli. Kanca: "Televizyon izlerken boynunuz mu ağrıyor? Ekran çok yüksekte."
+- [ ] hali-olcusu — Salon halısı kaç cm olmalı? | Piko
+      Kanepe ve koltukların en az ön ayakları halının üstünde · halı kanepeden iki yanda 15–20 cm taşmalı · halı kenarı duvara 30–60 cm kalmalı · yatak odasında halı yatağın iki yanından ve ayak ucundan 50–60 cm taşmalı. Kanca: "Halınız salonun ortasında pul gibi mi duruyor?"
+- [ ] sehpa — Orta sehpa ölçüsü nasıl seçilir? | Hasan
+      Sehpa yüksekliği kanepe oturumuyla aynı ya da 2–5 cm alçak (~40–45 cm) · uzunluğu kanepenin ~⅔'ü · kanepeyle arası 40–45 cm (diz için yer, uzanınca yetişir). Kanca: "Çay bardağını almak için kalkmak zorunda mı kalıyorsunuz?"
+- [ ] tezgah-yuksekligi — Mutfak tezgâhı kaç cm olmalı? | Piko
+      Standart tezgâh 90 cm · kişiye göre: dirsek yüksekliği − 10–15 cm · tezgâh derinliği 60–65 cm · paralel mutfakta iki tezgâh arası 100–120 cm. Kanca: "Bulaşık yıkarken beliniz ağrıyorsa suç tezgâhta."
+- [ ] mutfak-ucgeni — Mutfak çalışma üçgeni | Hasan
+      Evye – ocak – buzdolabı üçgeni · her kenar 120–270 cm · üç kenarın toplamı 400–790 cm · üçgenin içinden geçiş/kapı yolu geçmemeli. Kanca: "Mutfakta yemek yaparken maraton mu koşuyorsunuz?"
+- [ ] mutfak-adasi — Mutfak adası için kaç cm yer gerekir? | Piko
+      Ada çevresinde en az 90, rahat 100–120 cm geçiş · oturmalı adada derinlik en az 90 cm, oturma tarafında 25–30 cm çıkıntı · kişi başı 60 cm genişlik. Kanca: "Ada yaptırdınız, şimdi buzdolabının kapağı açılmıyor mu?"
+- [ ] gardirop — Gardırop iç ölçüleri | Hasan
+      Derinlik 60 cm (askı için en az 55) · uzun elbise/palto askısı 160–170 cm boşluk · gömlek/ceket için 100 cm (üst üste çift askı) · raf arası 30–35 cm. Kanca: "Dolap kapağı kapanmıyorsa askı sığmıyor demektir."
+- [ ] klozet — Klozet çevresinde kaç cm boşluk kalmalı? | Piko
+      Klozet merkezinden yan duvara/lavaboya en az 40, rahat 45 cm · önünde en az 60, rahat 75 cm boşluk · tuvalet kâğıtlığı yerden 60–70 cm, klozet önünden ~20 cm ileride. Kanca: "Tuvalette dizleriniz kapıya mı değiyor?"
+- [ ] banyo-aynasi — Banyo aynası nereye asılır? | Hasan
+      Aynanın ortası göz hizasında, yerden ~150–160 cm · alt kenar lavabo/batarya üstünden 20–25 cm yukarıda · ayna genişliği lavabo dolabının enini geçmemeli. Kanca: "Aynada sadece alnınızı mı görüyorsunuz?"
+- [ ] kapi-olculeri — Kapı ölçüleri ve kol yüksekliği | Piko
+      İç kapı genişliği 80–90 cm (banyo 70–80) · yükseklik 200–210 cm · kapı kolu yerden 100–105 cm · eşya taşımak için en az 80 cm net geçiş. Kanca: "Buzdolabı kapıdan geçmedi mi? Ölçü baştan yanlış."
+- [ ] kanepe — Kanepe alırken bakılacak 3 ölçü | Hasan
+      Oturma yüksekliği 42–45 cm · oturum derinliği 55–60 cm (derin kanepede ayaklar yere basmaz) · kişi başı ~60 cm genişlik (3 kişilik ≈ 180–220 cm) · kapı ve asansörden geçeceğini ölçün. Kanca: "Kanepeye oturunca ayaklarınız havada mı kalıyor?"
+- [ ] komodin — Komodin ve başucu aplik yüksekliği | Piko
+      Komodin üstü şiltenin üst yüzeyiyle aynı ya da ±5 cm · genişlik 45–60 cm · başucu aplik yatak yüzeyinden 50–60 cm yukarıda · yatakla komodin arası 5–10 cm. Kanca: "Gece telefonunuza uzanırken komodini mi arıyorsunuz?"
+- [ ] kitaplik — Kitaplık rafları kaç cm olmalı? | Hasan
+      Raf derinliği 25–30 cm · raf arası 30–35 cm (büyük kitaplar için 38–40) · 18 mm sunta rafta açıklık en fazla 80–90 cm, yoksa ortadan çöker · en üst raf uzanılabilir yükseklikte ~180–190 cm. Kanca: "Kitaplığınızın rafları ortadan mı çöktü?"
+- [ ] giris-vestiyer — Giriş vestiyeri ölçüleri | Piko
+      Ayakkabılık derinliği 30–35 cm · oturma bankı 45 cm yükseklik · portmanto askısı yerden 160–170 cm · girişte kapı açılınca en az 90 cm boş alan. Kanca: "Eve girince ayakkabıyı ayakta mı çıkarıyorsunuz?"
