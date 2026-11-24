@@ -50,7 +50,7 @@
       Aynanın ortası göz hizasında, yerden ~150–160 cm · alt kenar lavabo/batarya üstünden 20–25 cm yukarıda · ayna genişliği lavabo dolabının enini geçmemeli. Kanca: "Aynada sadece alnınızı mı görüyorsunuz?"
 - [ ] kapi-olculeri — Kapı ölçüleri ve kol yüksekliği | Piko
       İç kapı genişliği 80–90 cm (banyo 70–80) · yükseklik 200–210 cm · kapı kolu yerden 100–105 cm · eşya taşımak için en az 80 cm net geçiş. Kanca: "Buzdolabı kapıdan geçmedi mi? Ölçü baştan yanlış."
-- [ ] kanepe — Kanepe alırken bakılacak 3 ölçü | Hasan
+- [x] kanepe — Kanepe alırken bakılacak 3 ölçü | Hasan (2026-11-24, media 18079561442774901)
       Oturma yüksekliği 42–45 cm · oturum derinliği 55–60 cm (derin kanepede ayaklar yere basmaz) · kişi başı ~60 cm genişlik (3 kişilik ≈ 180–220 cm) · kapı ve asansörden geçeceğini ölçün. Kanca: "Kanepeye oturunca ayaklarınız havada mı kalıyor?"
 - [ ] komodin — Komodin ve başucu aplik yüksekliği | Piko
       Komodin üstü şiltenin üst yüzeyiyle aynı ya da ±5 cm · genişlik 45–60 cm · başucu aplik yatak yüzeyinden 50–60 cm yukarıda · yatakla komodin arası 5–10 cm. Kanca: "Gece telefonunuza uzanırken komodini mi arıyorsunuz?"
