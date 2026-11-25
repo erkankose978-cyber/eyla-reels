@@ -1,0 +1,187 @@
+// ---------- TV yüksekliği ve izleme mesafesi (cue-driven, 14 phrases) ----------
+const CU=window.CUES, S=i=>CU[i].s, E=i=>CU[i].e, at=(i,f)=>S(i)+(E(i)-S(i))*f;
+const OUT=window.OUTRO, END=window.END;
+const TXT=["Televizyon izlerken boynunuz mu ağrıyor?", "Ekran çok yüksekte.", "Kural şu:", "otururken ekranın ortası göz hizanızda olmalı,", "yani yerden yaklaşık 100 ile 110 santim.", "Mesafe için ekranın köşegenine bakın.", "4K televizyonda köşegenin 1 ile 1,5 katı yeterli.", "Örneğin 55 inç ekranın köşegeni yaklaşık 140 santim;", "kanepeniz 1,40 ile 2 metre arası uzakta olmalı.", "HD yayında bu kat 2,5'a kadar çıkar.", "Bonus:", "şömine üstü gibi yükseğe asıyorsanız ekranı aşağı eğin.", "Sizin televizyonunuz yerden kaç santim?", "Yorumlara yazın."];
+const GROUPS=[[0,1],[2,3],[4],[5],[6],[7],[8],[9],[10,11]];
+const WT=TXT.map((s,i)=>{ const ws=s.split(' '); const tot=ws.reduce((a,w)=>a+w.length+1,0); let acc=0; return ws.map(w=>{ const t0=S(i)+(E(i)-S(i))*acc/tot; acc+=w.length+1; return [w,t0]; }); });
+function captions(t){
+  GROUPS.forEach((gr,gi)=>{
+    const t0=S(gr[0])-.08, t1= gi<GROUPS.length-1 ? S(GROUPS[gi+1][0])-.08 : S(12)-.1;
+    const a=win(t,t0,t1,.15,.12); if(a<=0) return;
+    const words=[].concat(...gr.map(i=>WT[i])); const nextT=k=> k+1<words.length? words[k+1][1] : E(gr[gr.length-1])+.2;
+    g.save(); g.globalAlpha=a; g.font='600 48px P'; g.textBaseline='middle';
+    const sp=15, ws=words.map(w=>g.measureText(w[0]).width); const lines=[[]]; let lw=0;
+    words.forEach((w,i)=>{ if(lw+ws[i]>900 && lines[lines.length-1].length){ lines.push([]); lw=0; } lines[lines.length-1].push(i); lw+=ws[i]+sp; });
+    const y0=1720-(lines.length-1)*38;
+    lines.forEach((ln,li)=>{ const tot=ln.reduce((s,i)=>s+ws[i],0)+sp*(ln.length-1); let x=W/2-tot/2; const y=y0+li*76;
+      ln.forEach(i=>{ const on=t>=words[i][1], cur=on && t<nextT(i);
+        if(cur){ g.fillStyle=D.gold; rr(x-10,y-34,ws[i]+20,68,15); g.fill(); }
+        g.fillStyle= cur? D.ink : (on? D.cream : 'rgba(244,237,228,.35)'); g.textAlign='left'; g.fillText(words[i][0],x,y); x+=ws[i]+sp; }); });
+    g.restore(); });
+}
+function dim(x1,y1,x2,y2,label,col,a,offx=0,offy=0){
+  if(a<=0) return; g.save(); g.globalAlpha*=a; g.strokeStyle=col; g.lineWidth=3.5; g.lineCap='round';
+  const p=eOut(clamp(a*1.2)); const mx=(x1+x2)/2, my=(y1+y2)/2; const hx=(x2-x1)/2*p, hy=(y2-y1)/2*p;
+  g.beginPath(); g.moveTo(mx-hx,my-hy); g.lineTo(mx+hx,my+hy); g.stroke();
+  const vx=y2-y1, vy=-(x2-x1), L=Math.hypot(vx,vy)||1, ux=vx/L*13, uy=vy/L*13;
+  for(const [x,y] of [[mx-hx,my-hy],[mx+hx,my+hy]]){ g.beginPath(); g.moveTo(x-ux,y-uy); g.lineTo(x+ux,y+uy); g.stroke(); }
+  g.restore(); if(label) chip(mx+offx,my+offy,label,col,a,1,25);
+}
+function cta(t){
+  const a=win(t,S(12)-.1,OUT+.1,.35,.3); if(a<=0) return; g.save(); g.globalAlpha=a;
+  const bp=eBack(prog(t,S(12),S(12)+.5)); g.save(); g.translate(540,640); g.scale(bp,bp); g.rotate(Math.sin(t*3)*.04);
+  glass(-110,-85,220,150,40,'rgba(217,181,127,.7)'); g.fillStyle='rgba(30,25,20,.86)'; g.beginPath(); g.moveTo(-30,63); g.lineTo(-62,112); g.lineTo(10,63); g.fill();
+  g.fillStyle=D.gold; for(let k=-1;k<=1;k++){ g.beginPath(); g.arc(k*50,-10,13+3*Math.max(0,Math.sin(t*6-k)),0,7); g.fill(); } g.restore();
+  headline(t,S(12),[[['Televizyonunuz','n']],[['kaç','i'],['santim?','i']]],920,80,.07);
+  g.save(); g.globalAlpha*=eOut(prog(t,S(12)+.6,S(12)+1)); g.font='italic 600 46px L'; g.fillStyle=D.gold2; g.textAlign='center'; g.fillText('___ cm',540,1110); g.restore();
+  const yA=eOut(prog(t,S(13),S(13)+.4)); if(yA>0){ g.save(); g.globalAlpha*=yA; g.font='700 50px P'; g.fillStyle=D.good; g.textAlign='center'; g.fillText('Yorumlara yazın',540,1280);
+    g.strokeStyle=D.good; g.lineWidth=7; g.lineCap='round'; const yy=1320+Math.sin(t*6)*8; g.beginPath(); g.moveTo(540,yy); g.lineTo(540,yy+60); g.moveTo(515,yy+35); g.lineTo(540,yy+62); g.lineTo(565,yy+35); g.stroke(); g.restore(); }
+  g.restore(); }
+function outro(t){
+  const p=prog(t,OUT,OUT+.7); if(p<=0) return;
+  const R=eIO(p)*Math.hypot(W,H);
+  g.save(); g.beginPath(); g.arc(W/2,960,R,0,7); g.clip();
+  const gr=g.createRadialGradient(W/2,900,50,W/2,960,1300); gr.addColorStop(0,'#3A302A'); gr.addColorStop(1,'#120F0C'); g.fillStyle=gr; g.fillRect(0,0,W,H);
+  const lp_=eOut(prog(t,OUT+.45,OUT+1.3)); const L=imgs.logoW, h=lerp(380,420,lp_), w=L.width/L.height*h;
+  g.globalAlpha=lp_; g.drawImage(L,W/2-w/2,800-h/2+(1-lp_)*40,w,h);
+  const ln=eIO(prog(t,OUT+1.0,OUT+1.7)); g.globalAlpha=1; g.strokeStyle=D.gold; g.lineWidth=3; g.beginPath(); g.moveTo(W/2-140*ln,1060); g.lineTo(W/2+140*ln,1060); g.stroke();
+  const t1=eOut(prog(t,OUT+1.2,OUT+1.8)); g.globalAlpha=t1; g.font='300 46px P'; g.fillStyle=D.cream; g.textAlign='center'; g.textBaseline='middle';
+  g.letterSpacing='14px'; g.fillText('İÇ MİMARLIK',W/2+7,1130+(1-t1)*20); g.letterSpacing='0px';
+  const t2=eOut(prog(t,OUT+1.6,OUT+2.2)); g.globalAlpha=t2; g.font='700 40px P'; g.fillStyle=D.gold; g.fillText('#SantimiSantimine',W/2,1250+(1-t2)*20);
+  g.font='italic 500 36px L'; g.fillStyle='rgba(244,237,228,.8)'; g.fillText('Her gün bir iç mimarlık kuralı',W/2,1320+(1-t2)*20);
+  const t3=eOut(prog(t,OUT+2.0,OUT+2.6)); g.globalAlpha=t3*.5; g.font='400 23px P'; g.fillStyle=D.cream;
+  g.fillText('Ölçüler genel öneridir; kişiye ve modele göre değişebilir.',W/2,1640);
+  g.globalAlpha=eIn(prog(t,END-.35,END)); g.fillStyle='#000'; g.fillRect(0,0,W,H);
+  g.restore(); }
+
+// ===== side view: sofa + person + wall TV =====
+const K=4, FY=1240, X0=120, X=cm=>X0+cm*K, Y=cm=>FY-cm*K;
+const SOFA='#8E6B4F', SOFA2='#A9845F', SOFA3='#6E5240', SKIN='#E8D9C6', CLOTH='#5F7F86', CLOTH2='#4C676D';
+const EYE={x:44,y:110}, TVX=222, WALLX=230, TVH=68;
+function limb(x1,y1,x2,y2,w,col){ g.strokeStyle=col; g.lineWidth=w; g.lineCap='round'; g.beginPath(); g.moveTo(x1,y1); g.lineTo(x2,y2); g.stroke(); }
+function tvState(t){
+  const drop=eIO(prog(t,S(3),S(3)+1.0));
+  const up=eIO(prog(t,S(10)+.1,S(10)+1.0));
+  const h=lerp(lerp(165,105,drop),165,up);
+  const tilt=eIO(prog(t,at(11,.55),at(11,.55)+.9))*14;
+  const fire=eOut(prog(t,S(10),S(10)+.6));
+  return {h,tilt,fire,up};
+}
+function fireplace(a){ if(a<=0) return; g.save(); g.globalAlpha*=a;
+  g.fillStyle='#4A3D34'; rr(X(196),Y(112),(WALLX-196)*K,112*K,8); g.fill();
+  g.fillStyle='#5C4C40'; rr(X(190),Y(116),(WALLX-188)*K,7*K,4); g.fill();
+  g.fillStyle='#1A1410'; rr(X(204),Y(70),(WALLX-208)*K,62*K,6); g.fill();
+  const fl=(.75+.25*Math.sin(perfT*9))*a; const gr=g.createRadialGradient(X(214),Y(22),5,X(214),Y(22),90); gr.addColorStop(0,`rgba(255,170,80,${.85*fl})`); gr.addColorStop(1,'rgba(255,120,40,0)');
+  g.fillStyle=gr; g.fillRect(X(204),Y(70),(WALLX-208)*K,62*K); g.restore(); }
+let perfT=0;
+function sideScene(t,A){
+  if(A<=0) return; g.save(); g.globalAlpha*=A; perfT=t;
+  const {h,tilt,fire}=tvState(t);
+  // floor + wall
+  g.fillStyle='rgba(244,237,228,.10)'; g.fillRect(60,FY,W-120,4);
+  const fg=g.createLinearGradient(0,FY,0,FY+120); fg.addColorStop(0,'rgba(217,181,127,.10)'); fg.addColorStop(1,'rgba(217,181,127,0)'); g.fillStyle=fg; g.fillRect(60,FY+4,W-120,120);
+  const wg=g.createLinearGradient(0,Y(225),0,FY); wg.addColorStop(0,'rgba(244,237,228,0)'); wg.addColorStop(.3,'rgba(244,237,228,.12)'); wg.addColorStop(1,'rgba(244,237,228,.16)');
+  g.fillStyle=wg; g.fillRect(X(WALLX),Y(225),14,225*K);
+  fireplace(fire);
+  // sofa
+  g.fillStyle='#3B2E25'; rr(X(4),Y(10),5*K,10*K,4); g.fill(); rr(X(74),Y(10),5*K,10*K,4); g.fill();
+  g.fillStyle=SOFA; rr(X(0),Y(32),84*K,22*K,14); g.fill();
+  g.fillStyle=SOFA; rr(X(0),Y(88),22*K,78*K,24); g.fill();
+  g.fillStyle=SOFA2; rr(X(6),Y(84),16*K,40*K,20); g.fill();
+  g.fillStyle=SOFA2; rr(X(20),Y(44),64*K,14*K,18); g.fill();
+  // person (looking at TV)
+  const ang=Math.atan2(h-EYE.y,TVX-EYE.x);
+  const hipX=32, hipY=50;
+  limb(X(hipX),Y(hipY),X(36),Y(94),24*K,CLOTH);
+  limb(X(hipX),Y(hipY),X(80),Y(52),14*K,CLOTH2);
+  limb(X(80),Y(52),X(84),Y(8),10*K,CLOTH2);
+  g.fillStyle='#2A2420'; rr(X(80),Y(8),22*K,6*K,10); g.fill();
+  limb(X(36),Y(92),X(46),Y(70),7*K,CLOTH); limb(X(46),Y(70),X(66),Y(62),6*K,SKIN);
+  g.save(); g.translate(X(38),Y(100)); g.rotate(-ang*.8);
+  g.fillStyle=SKIN; g.beginPath(); g.arc(2*K,-8*K,11*K,0,7); g.fill();
+  g.fillStyle='#3A2B22'; g.beginPath(); g.arc(-1*K,-11*K,11*K,Math.PI*.85,Math.PI*1.95); g.fill();
+  g.fillStyle='#2A2420'; g.beginPath(); g.arc(9*K,-9*K,1.6*K,0,7); g.fill();
+  g.restore();
+  // neck strain marker
+  const bad=clamp((Math.abs(h-EYE.y)-15)/30);
+  if(bad>0){ g.save(); g.globalAlpha*=bad*(.55+.45*Math.sin(t*8)); g.strokeStyle=D.bad; g.lineWidth=5; g.setLineDash([12,9]);
+    g.beginPath(); g.arc(X(36),Y(98),13*K,Math.PI*.95,Math.PI*1.55); g.stroke(); g.restore(); }
+  // eye line
+  const ex=X(EYE.x+6), ey=Y(EYE.y), tx=X(TVX-2), ty=Y(h);
+  const lc= bad>.3? D.bad : D.good;
+  g.save(); g.globalAlpha*=.85; g.strokeStyle=lc; g.lineWidth=4; g.setLineDash([16,12]); g.lineDashOffset=-t*40;
+  g.beginPath(); g.moveTo(ex,ey); g.lineTo(tx,ty); g.stroke(); g.restore();
+  // TV (side slab)
+  g.save(); g.translate(X(TVX),Y(h)); g.rotate(-tilt*Math.PI/180);
+  g.fillStyle='#14110F'; rr(-3*K,-TVH/2*K,6*K,TVH*K,6); g.fill();
+  g.fillStyle='rgba(150,190,230,.55)'; g.fillRect(-3*K,-TVH/2*K+4,4,TVH*K-8);
+  const cone=g.createLinearGradient(0,0,-110*K,0); cone.addColorStop(0,'rgba(150,190,230,.16)'); cone.addColorStop(1,'rgba(150,190,230,0)');
+  g.fillStyle=cone; g.beginPath(); g.moveTo(-3*K,-TVH/2*K); g.lineTo(-110*K,-TVH*K); g.lineTo(-110*K,TVH*K); g.lineTo(-3*K,TVH/2*K); g.fill();
+  g.restore();
+  g.strokeStyle='#5C4C40'; g.lineWidth=8; g.beginPath(); g.moveTo(X(TVX+3),Y(h)); g.lineTo(X(WALLX),Y(h)); g.stroke();
+  // dims
+  dim(X(196),FY,X(196),Y(h),'100–110 cm',D.gold,win(t,at(4,.1),S(5),.35,.25),-120,0);
+  const da=win(t,S(8),S(10),.35,.25);
+  dim(X(EYE.x+6),FY+50,X(TVX),FY+50,'1,4–2 m',D.gold,da*(1-clamp((t-S(9))/.3)),0,0);
+  dim(X(EYE.x+6),FY+50,X(TVX),FY+50,'HD: 2,1–3,5 m',D.gold2,win(t,S(9),S(10),.3,.25),0,0);
+  g.restore();
+}
+// ===== front view: diagonal =====
+function frontScene(t,A){
+  if(A<=0) return; g.save(); g.globalAlpha*=A;
+  const KF=5, w=122*KF, h=69*KF, cx=540, cy=860;
+  const s=eBack(clamp(prog(t,S(5),S(5)+.6))); g.save(); g.translate(cx,cy); g.scale(.85+.15*s,.85+.15*s);
+  g.fillStyle='rgba(244,237,228,.08)'; g.fillRect(-w/2-60,-h/2-60,w+120,h+120);
+  g.fillStyle='#14110F'; rr(-w/2-10,-h/2-10,w+20,h+20,14); g.fill();
+  const sg=g.createLinearGradient(-w/2,-h/2,w/2,h/2); sg.addColorStop(0,'#2E4A5E'); sg.addColorStop(.6,'#1B2B38'); sg.addColorStop(1,'#3A5A6C'); g.fillStyle=sg; g.fillRect(-w/2,-h/2,w,h);
+  g.fillStyle='rgba(255,255,255,.06)'; g.beginPath(); g.moveTo(-w/2,-h/2); g.lineTo(-w/2+w*.45,-h/2); g.lineTo(-w/2+w*.2,h/2); g.lineTo(-w/2,h/2); g.fill();
+  const dp=eIO(prog(t,at(5,.35),at(5,.35)+.9));
+  if(dp>0){ g.strokeStyle=D.gold; g.lineWidth=6; g.lineCap='round'; g.beginPath(); g.moveTo(-w/2,h/2); g.lineTo(-w/2+w*dp,h/2-h*dp); g.stroke();
+    for(const [x,y] of [[-w/2,h/2],[-w/2+w*dp,h/2-h*dp]]){ g.fillStyle=D.gold; g.beginPath(); g.arc(x,y,10,0,7); g.fill(); } }
+  g.restore();
+  chip(cx,cy+12,'köşegen',D.gold,win(t,at(5,.7),S(7),.3,.25),1,30);
+  chip(cx,cy+12,'55″ ≈ 140 cm',D.gold2,win(t,at(7,.3),S(8)+.1,.3,.25),eBack(prog(t,at(7,.3),at(7,.3)+.4)),34);
+  // multiplier scale under TV
+  const ma=win(t,at(6,.2),S(8)+.1,.35,.25);
+  if(ma>0){ g.save(); g.globalAlpha*=ma; const y=cy+h/2+110; g.strokeStyle=D.cream; g.lineWidth=3; g.beginPath(); g.moveTo(cx-300,y); g.lineTo(cx+300,y); g.stroke();
+    g.fillStyle='rgba(139,203,147,.35)'; const p=eOut(clamp(ma*1.2)); g.fillRect(cx-300,y-14,600*p,28);
+    g.font='700 40px P'; g.fillStyle=D.good; g.textAlign='center'; g.textBaseline='middle'; g.fillText('× 1',cx-300,y-50); g.fillText('× 1,5',cx+300,y-50);
+    g.font='500 30px P'; g.fillStyle=D.muted; g.fillText('4K',cx,y+48); g.restore(); }
+  g.restore();
+}
+function scene(t){
+  const z=1+.02*prog(t,0,S(12));
+  g.save(); g.translate(540,1000); g.scale(z,z); g.translate(-540,-1000);
+  sideScene(t,Math.max(win(t,0,S(5)+.25,.4,.35),win(t,S(8)-.05,S(12)+.1,.4,.35)));
+  frontScene(t,win(t,S(5)+.05,S(8)+.1,.4,.35));
+  g.restore();
+  const CY_=1370;
+  chip(540,CY_,'Ekran çok yüksek: boyun bükülür',D.bad,win(t,.8,S(3)+.3,.3,.25),eBack(prog(t,.8,1.2)),30,'✕');
+  chip(540,CY_,'Ekran ortası = göz hizası',D.good,win(t,at(3,.7),S(5),.3,.3),eBack(prog(t,at(3,.7),at(3,.7)+.4)),30,'✓');
+  chip(540,CY_,'Ekranı aşağı eğin',D.good,win(t,at(11,.7),S(12)+.1,.3,.3),eBack(prog(t,at(11,.7),at(11,.7)+.4)),30,'✓');
+}
+function card(t){
+  const rows=[[S(2),S(5),'TV yüksekliği','ekran ortası 100–110 cm'],[S(5),S(7),'4K izleme mesafesi','köşegen × 1–1,5'],[S(7),S(9),'55″ TV · köşegen ≈ 140 cm','1,4–2 m uzaklık'],[S(9),S(10),'HD yayın','köşegen × 1,5–2,5'],[S(10),S(12)+.1,'Yüksek montaj','ekranı aşağı eğin']];
+  rows.forEach(([a,b,k,v])=>{ const al=win(t,a-.05,b,.3,.3); if(al<=0) return; g.save(); g.globalAlpha=al;
+    glass(80,1440,920,150,30); g.font='500 32px P'; g.fillStyle=D.muted; g.textAlign='center'; g.textBaseline='middle'; g.fillText(k,540,1482);
+    let fs=52; g.font=`italic 700 ${fs}px L`; while(g.measureText(v).width>860 && fs>30){ fs-=2; g.font=`italic 700 ${fs}px L`; }
+    g.fillStyle=D.gold2; g.fillText(v,540,1545); g.restore(); });
+}
+const HEADS=[
+  [S(0)-.05,S(2),[[['Boynunuz','n']],[['ağrıyor','i'],['mu?','i']]]],
+  [S(2),S(5),[[['Ekranın','n'],['ortası','n']],[['göz','i'],['hizasında','i']]]],
+  [S(5),S(8),[[['Mesafe','n'],['=','n']],[['köşegen','i'],['×','i'],['1–1,5','i']]]],
+  [S(8),S(10),[[['55″','n'],['TV','n']],[['1,4–2','i'],['metre','i']]]],
+  [S(10),S(12),[[['Bonus:','n'],['yüksekse','n']],[['aşağı','i'],['eğin','i']]]],
+];
+window.draw=function(t){
+  g.setTransform(1,0,0,1,0,0); g.globalAlpha=1; g.filter='none';
+  bg(t); topBar();
+  HEADS.forEach(([a,b,lines])=>{ const h=win(t,a,b,.01,.3); if(h>0){ g.save(); g.globalAlpha=h; headline(t,a,lines,300,74); g.restore(); } });
+  scene(t); card(t); cta(t);
+  captions(t);
+  for(const tt of [S(2),S(5),S(8),S(10),S(12)]){ const p=prog(t,tt-.25,tt+.35); if(p>0&&p<1){ const x=lerp(-400,W+400,eIO(p)); const sw=g.createLinearGradient(x-260,0,x+260,0); sw.addColorStop(0,'rgba(255,230,190,0)'); sw.addColorStop(.5,'rgba(255,230,190,.16)'); sw.addColorStop(1,'rgba(255,230,190,0)'); g.fillStyle=sw; g.fillRect(0,0,W,H); } }
+  outro(t);
+  post(t);
+};
+</script></body></html>
