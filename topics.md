@@ -32,7 +32,7 @@
       Spotlar arası mesafe ≈ tavan yüksekliğinin yarısı (260 cm tavan → ~120–130 cm) · duvardan uzaklık 40–60 cm (duvarı yalayan ışık için 30–40) · dolap önlerinde dolap kapağından 30–40 cm ileri. Kanca: "Tavan spot dolu ama oda hâlâ karanlık mı?"
 - [x] tv-mesafesi — TV kaç cm yükseğe ve kaç metre uzağa? | Hasan (2026-11-25, media 17945230050384889)
       Ekranın merkezi otururken göz hizasında, yerden ~100–110 cm · izleme mesafesi 4K'da ekran köşegeni × 1–1,5 (55" ≈ 140 cm → 1,4–2,1 m), HD'de × 1,5–2,5 · şömine üstü gibi yüksek montajda ekran aşağı eğilmeli. Kanca: "Televizyon izlerken boynunuz mu ağrıyor? Ekran çok yüksekte."
-- [ ] hali-olcusu — Salon halısı kaç cm olmalı? | Piko
+- [x] hali-olcusu — Salon halısı kaç cm olmalı? | Piko (2026-11-26, media 18485388994116884)
       Kanepe ve koltukların en az ön ayakları halının üstünde · halı kanepeden iki yanda 15–20 cm taşmalı · halı kenarı duvara 30–60 cm kalmalı · yatak odasında halı yatağın iki yanından ve ayak ucundan 50–60 cm taşmalı. Kanca: "Halınız salonun ortasında pul gibi mi duruyor?"
 - [ ] sehpa — Orta sehpa ölçüsü nasıl seçilir? | Hasan
       Sehpa yüksekliği kanepe oturumuyla aynı ya da 2–5 cm alçak (~40–45 cm) · uzunluğu kanepenin ~⅔'ü · kanepeyle arası 40–45 cm (diz için yer, uzanınca yetişir). Kanca: "Çay bardağını almak için kalkmak zorunda mı kalıyorsunuz?"
