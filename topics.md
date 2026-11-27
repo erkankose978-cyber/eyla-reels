@@ -34,7 +34,7 @@
       Ekranın merkezi otururken göz hizasında, yerden ~100–110 cm · izleme mesafesi 4K'da ekran köşegeni × 1–1,5 (55" ≈ 140 cm → 1,4–2,1 m), HD'de × 1,5–2,5 · şömine üstü gibi yüksek montajda ekran aşağı eğilmeli. Kanca: "Televizyon izlerken boynunuz mu ağrıyor? Ekran çok yüksekte."
 - [x] hali-olcusu — Salon halısı kaç cm olmalı? | Piko (2026-11-26, media 18485388994116884)
       Kanepe ve koltukların en az ön ayakları halının üstünde · halı kanepeden iki yanda 15–20 cm taşmalı · halı kenarı duvara 30–60 cm kalmalı · yatak odasında halı yatağın iki yanından ve ayak ucundan 50–60 cm taşmalı. Kanca: "Halınız salonun ortasında pul gibi mi duruyor?"
-- [ ] sehpa — Orta sehpa ölçüsü nasıl seçilir? | Hasan
+- [x] sehpa — Orta sehpa ölçüsü nasıl seçilir? | Hasan (2026-11-27, media 18202519819383428)
       Sehpa yüksekliği kanepe oturumuyla aynı ya da 2–5 cm alçak (~40–45 cm) · uzunluğu kanepenin ~⅔'ü · kanepeyle arası 40–45 cm (diz için yer, uzanınca yetişir). Kanca: "Çay bardağını almak için kalkmak zorunda mı kalıyorsunuz?"
 - [ ] tezgah-yuksekligi — Mutfak tezgâhı kaç cm olmalı? | Piko
       Standart tezgâh 90 cm · kişiye göre: dirsek yüksekliği − 10–15 cm · tezgâh derinliği 60–65 cm · paralel mutfakta iki tezgâh arası 100–120 cm. Kanca: "Bulaşık yıkarken beliniz ağrıyorsa suç tezgâhta."
